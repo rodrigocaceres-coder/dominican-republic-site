@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b3c8c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<title>Facts | Quisqueya</title>
+<meta name="description" content="General information, fun facts and photo credits for the Dominican Republic.">
+</head>
+<body>
+<a class="skip" href="#main" data-es="Saltar al contenido">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>Quisqueya</a>
+    <div class="tools">
+      <button class="icon-btn" id="lang-toggle" type="button" aria-label="Cambiar a español">ES</button>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle dark mode">☾</button>
+      <button class="icon-btn nav-toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">☰</button>
+    </div>
+    <nav id="nav" class="nav" aria-label="Main">
+      <a href="index.html" data-es="Inicio">Home</a>
+      <a href="explore.html" data-es="Explorar">Explore</a>
+      <a href="culture.html" data-es="Cultura">Culture</a>
+      <a href="games.html" data-es="Juegos">Games</a>
+      <a href="facts.html" data-es="Datos">Facts</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <header class="hero short" style="background-image: linear-gradient(180deg, rgba(8,24,56,.35), rgba(8,24,56,.75)), url('images/haitises.jpg')">
+    <div class="wrap">
+      <p class="eyebrow" data-es="Datos">Facts</p>
+      <h1 data-es="Todo lo básico, y algo más">The basics, and a bit more</h1>
+      <p data-es="Información general, datos curiosos y una prueba rápida para ver cuánto aprendiste.">General info, fun facts and a quick quiz to see what you learned.</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-es="General">General</p>
+        <h2 data-es="Información del país">Country info</h2>
+      </div>
+      <div class="grid">
+        <article class="card text-card reveal"><h3 data-es="Nombre oficial">Official name</h3><p>República Dominicana</p></article>
+        <article class="card text-card reveal"><h3 data-es="Capital">Capital</h3><p>Santo Domingo</p></article>
+        <article class="card text-card reveal"><h3 data-es="Idioma">Language</h3><p data-es="Español, con algo de inglés en zonas turísticas.">Spanish, with some English in tourist areas.</p></article>
+        <article class="card text-card reveal"><h3 data-es="Moneda">Currency</h3><p data-es="Peso dominicano (DOP)">Dominican peso (DOP)</p></article>
+        <article class="card text-card reveal"><h3 data-es="Población">Population</h3><p data-es="Alrededor de 11 millones de personas.">About 11 million people.</p></article>
+        <article class="card text-card reveal"><h3 data-es="Zona horaria">Time zone</h3><p data-es="UTC-4, sin cambio de horario.">UTC-4, no daylight saving.</p></article>
+        <article class="card text-card reveal"><h3 data-es="Fecha patria">National day</h3><p data-es="27 de febrero (Independencia, 1844).">February 27 (Independence, 1844).</p></article>
+        <article class="card text-card reveal"><h3 data-es="Colores de la bandera">Flag colors</h3><p data-es="Azul, rojo y blanco, con una cruz blanca al centro.">Blue, red and white, with a white cross at the center.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="tinted">
+    <div class="wrap">
+      <div class="fact-box reveal">
+        <p class="eyebrow" style="color:#ffd166" data-es="Dato curioso">Fun fact</p>
+        <div class="fact-text"><p id="fact-text" aria-live="polite"></p></div>
+        <button class="btn" id="fact-btn" type="button" data-es="Otro dato">Another fact</button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-es="Verdadero o falso">True or false</p>
+        <h2 data-es="Prueba rápida">Quick check</h2>
+      </div>
+      <div class="tf reveal">
+        <p class="eyebrow" id="tf-score">0 / 7</p>
+        <div class="q"><p id="tf-question" aria-live="polite"></p></div>
+        <div class="tf-actions">
+          <button class="btn alt" id="tf-true" type="button" data-es="Verdadero">True</button>
+          <button class="btn" id="tf-false" type="button" data-es="Falso">False</button>
+        </div>
+        <p class="tf-result" id="tf-result" aria-live="polite"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="tinted" id="credits">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-es="Créditos">Credits</p>
+        <h2 data-es="Fotografías">Photographs</h2>
+        <p class="lead" data-es="Todas las fotos vienen de Wikimedia Commons con licencias abiertas.">All photos come from Wikimedia Commons under open licenses.</p>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="credits">
+          <thead><tr><th data-es="Imagen">Image</th><th data-es="Autor">Author</th><th data-es="Licencia">License</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Calle_las_Damas,_Santo_Domingo,_Zona_Colonial.jpg">Calle las Damas, Zona Colonial</a></td><td>Desox7x</td><td>CC0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:DOM_Santa_B%C3%A1rbara_de_Saman%C3%A1,_El_Lim%C3%B3n,_Monumento_Natural_Salto_El_Lim%C3%B3n_0018.jpg">Salto El Limón</a></td><td>-wuppertaler</td><td>CC BY 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Pico_Duarte.jpg">Pico Duarte</a></td><td>Adrian Michael</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Punta_Cana_Beach_01.jpg">Punta Cana Beach</a></td><td>NoonIcarus</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Altos_de_Chavon_1.jpg">Altos de Chavón</a></td><td>Andreas Volkmer</td><td data-es="Dominio público">Public domain</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Los_Haitises_Park.jpeg">Los Haitises</a></td><td>Anton Bielousov</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:27_Charcas_rio_Damajagua_-_panoramio.jpg">27 Charcos de Damajagua</a></td><td>kikeam71</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Playa_Rinc%C3%B3n_Dec_2020.jpg">Playa Rincón</a></td><td>Danu Widjajanto</td><td>CC BY-SA 4.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap cols">
+    <div><strong>Quisqueya</strong><br><small data-es="Un proyecto sobre la República Dominicana. Hecho con HTML, CSS y JavaScript.">A project about the Dominican Republic. Built with HTML, CSS and JavaScript.</small></div>
+    <div><a href="facts.html#credits" data-es="Créditos de fotos">Photo credits</a> · <a href="index.html" data-es="Volver arriba">Home</a></div>
+  </div>
+</footer>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

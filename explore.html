@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b3c8c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<title>Explore | Quisqueya</title>
+<meta name="description" content="Beaches, mountains, waterfalls and historic sites to visit in the Dominican Republic.">
+</head>
+<body>
+<a class="skip" href="#main" data-es="Saltar al contenido">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>Quisqueya</a>
+    <div class="tools">
+      <button class="icon-btn" id="lang-toggle" type="button" aria-label="Cambiar a español">ES</button>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle dark mode">☾</button>
+      <button class="icon-btn nav-toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">☰</button>
+    </div>
+    <nav id="nav" class="nav" aria-label="Main">
+      <a href="index.html" data-es="Inicio">Home</a>
+      <a href="explore.html" data-es="Explorar">Explore</a>
+      <a href="culture.html" data-es="Cultura">Culture</a>
+      <a href="games.html" data-es="Juegos">Games</a>
+      <a href="facts.html" data-es="Datos">Facts</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <header class="hero short" style="background-image: linear-gradient(180deg, rgba(8,24,56,.35), rgba(8,24,56,.75)), url('images/salto-limon.jpg')">
+    <div class="wrap">
+      <p class="eyebrow" data-es="Lugares para visitar">Places to visit</p>
+      <h1 data-es="Explora la isla">Explore the island</h1>
+      <p data-es="Ocho lugares para empezar tu lista. Filtra, busca o toca un punto del mapa.">Eight places to start your list. Filter, search or tap a pin on the map.</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <div class="toolbar" role="group" aria-label="Filters">
+        <button class="chip" data-cat="all" aria-pressed="true" type="button" data-es="Todos">All</button>
+        <button class="chip" data-cat="beach" aria-pressed="false" type="button" data-es="Playas">Beaches</button>
+        <button class="chip" data-cat="nature" aria-pressed="false" type="button" data-es="Naturaleza">Nature</button>
+        <button class="chip" data-cat="history" aria-pressed="false" type="button" data-es="Historia">History</button>
+        <input class="search" id="place-search" type="search" placeholder="Search places..." data-es-placeholder="Buscar lugares..." aria-label="Search places">
+      </div>
+      <div class="grid" id="places-grid"></div>
+    </div>
+  </section>
+
+  <section class="tinted">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-es="Mapa">Map</p>
+        <h2 data-es="Dónde está todo">Where everything is</h2>
+        <p class="lead" data-es="Un mapa simplificado de la isla. Toca un punto rojo para ver los detalles.">A simplified map of the country. Tap a red pin to see details.</p>
+      </div>
+      <div class="map-wrap reveal">
+        <svg id="places-map" viewBox="0 0 900 680" role="img" aria-label="Map of the Dominican Republic with places to visit" data-es-aria="Mapa de la República Dominicana con lugares para visitar"></svg>
+        <p class="map-note" data-es="Mapa simplificado, no está a escala exacta.">Simplified map, not to exact scale.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-es="Antes de ir">Before you go</p>
+        <h2 data-es="Consejos rápidos de viaje">Quick travel tips</h2>
+      </div>
+      <ol class="checklist reveal">
+        <li data-es="Lleva efectivo en pesos para colmados, guaguas y mercados pequeños.">Carry some pesos in cash for colmados, buses and small markets.</li>
+        <li data-es="Usa protector solar y repelente, sobre todo al atardecer.">Pack sunscreen and insect repellent, especially at sunset.</li>
+        <li data-es="Aprende un par de frases en español. Un saludo abre muchas puertas.">Learn a few Spanish phrases. A greeting opens many doors.</li>
+        <li data-es="Toma agua embotellada y prueba la comida de puestos concurridos.">Drink bottled water and eat at busy food stands.</li>
+        <li data-es="Reserva excursiones de naturaleza con guías locales autorizados.">Book nature excursions with authorized local guides.</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<div class="modal-back" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal">
+    <button class="icon-btn modal-close" id="modal-close" type="button" aria-label="Close">✕</button>
+    <img id="modal-img" src="images/colonial.jpg" alt="">
+    <div class="modal-body">
+      <span class="tag" id="modal-tag"></span>
+      <h2 id="modal-title"></h2>
+      <p id="modal-text"></p>
+      <dl>
+        <dt data-es="Dónde">Where</dt><dd id="modal-where"></dd>
+        <dt data-es="Consejo">Tip</dt><dd id="modal-best"></dd>
+      </dl>
+      <p class="credit"><span data-es="Fotos con licencia abierta. Créditos en la página de">Photos under open licenses. Credits on the</span> <a href="facts.html#credits" data-es="Datos">Facts page</a>.</p>
+    </div>
+  </div>
+</div>
+<footer class="site-footer">
+  <div class="wrap cols">
+    <div><strong>Quisqueya</strong><br><small data-es="Un proyecto sobre la República Dominicana. Hecho con HTML, CSS y JavaScript.">A project about the Dominican Republic. Built with HTML, CSS and JavaScript.</small></div>
+    <div><a href="facts.html#credits" data-es="Créditos de fotos">Photo credits</a> · <a href="index.html" data-es="Volver arriba">Home</a></div>
+  </div>
+</footer>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

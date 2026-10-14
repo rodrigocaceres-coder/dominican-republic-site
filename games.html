@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b3c8c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<title>Games | Quisqueya</title>
+<meta name="description" content="Four games inspired by Dominican culture: merengue rhythm, map challenge, slang quiz and dominoes.">
+</head>
+<body>
+<a class="skip" href="#main" data-es="Saltar al contenido">Skip to content</a>
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true"></span>Quisqueya</a>
+    <div class="tools">
+      <button class="icon-btn" id="lang-toggle" type="button" aria-label="Cambiar a español">ES</button>
+      <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle dark mode">☾</button>
+      <button class="icon-btn nav-toggle" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu">☰</button>
+    </div>
+    <nav id="nav" class="nav" aria-label="Main">
+      <a href="index.html" data-es="Inicio">Home</a>
+      <a href="explore.html" data-es="Explorar">Explore</a>
+      <a href="culture.html" data-es="Cultura">Culture</a>
+      <a href="games.html" data-es="Juegos">Games</a>
+      <a href="facts.html" data-es="Datos">Facts</a>
+    </nav>
+  </div>
+</header>
+<main id="main">
+  <header class="hero short" style="background-image: linear-gradient(180deg, rgba(8,24,56,.35), rgba(8,24,56,.75)), url('images/damajagua.jpg')">
+    <div class="wrap">
+      <p class="eyebrow" data-es="Juegos">Games</p>
+      <h1 data-es="Juega la cultura">Play the culture</h1>
+      <p data-es="Cuatro juegos inspirados en la República Dominicana. Tus mejores puntajes se guardan en este navegador.">Four games inspired by the Dominican Republic. Your best scores are saved in this browser.</p>
+    </div>
+  </header>
+
+  <section>
+    <div class="wrap">
+      <div class="game-tabs" role="tablist" aria-label="Games">
+        <button class="chip" role="tab" data-game="rhythm" aria-pressed="true" type="button" data-es="🥁 Ritmo de merengue">🥁 Merengue Rhythm</button>
+        <button class="chip" role="tab" data-game="map" aria-pressed="false" type="button" data-es="🗺 Reto del mapa">🗺 Map Challenge</button>
+        <button class="chip" role="tab" data-game="slang" aria-pressed="false" type="button" data-es="💬 Jerga dominicana">💬 Slang Quiz</button>
+        <button class="chip" role="tab" data-game="dominoes" aria-pressed="false" type="button" data-es="🁣 Dominó">🁣 Dominoes</button>
+        <button class="chip" id="sound-toggle" aria-pressed="true" type="button" data-es="🔊 Sonido">🔊 Sound</button>
+      </div>
+
+      <!-- 1. RHYTHM -->
+      <div class="game-panel active" id="game-rhythm">
+        <div class="game-box">
+          <div class="game-top">
+            <h2 style="margin:0" data-es="Ritmo de merengue">Merengue Rhythm</h2>
+            <div class="hud"><span><span data-es="Puntos">Score</span>: <b id="r-score">0</b></span><span>Combo: <b id="r-combo">0</b></span><span><span data-es="Mejor">Best</span>: <b id="r-best">0</b></span></div>
+          </div>
+          <canvas id="rhythm-canvas" width="560" height="600" aria-label="Merengue rhythm game"></canvas>
+          <div class="judge" id="r-judge" aria-live="polite"></div>
+          <p class="lane-help" data-es="Toca las teclas D F J K (o toca cada carril) cuando las notas lleguen a la línea. Tambora, güira, conga y acordeón.">Press D F J K (or tap each lane) when the notes reach the line. Tambora, güira, conga and accordion.</p>
+          <p style="text-align:center"><button class="btn" id="r-start" type="button" data-es="Empezar">Start</button></p>
+        </div>
+      </div>
+
+      <!-- 2. MAP CHALLENGE -->
+      <div class="game-panel" id="game-map">
+        <div class="game-box">
+          <div class="game-top">
+            <h2 style="margin:0" data-es="Reto del mapa">Map Challenge</h2>
+            <div class="hud"><span><span data-es="Ronda">Round</span>: <b id="m-round">0</b>/10</span><span><span data-es="Puntos">Score</span>: <b id="m-score">0</b></span><span><span data-es="Mejor">Best</span>: <b id="m-best">0</b></span></div>
+          </div>
+          <p class="map-target"><span data-es="Encuentra:">Find:</span> <span id="m-target">...</span></p>
+          <div class="map-wrap"><svg id="challenge-svg" viewBox="0 0 900 680" role="img" aria-label="Click the map to answer"></svg></div>
+          <p class="map-feedback" id="m-feedback" aria-live="polite"></p>
+          <p style="text-align:center"><button class="btn" id="m-next" type="button" data-es="Empezar">Start</button></p>
+        </div>
+      </div>
+
+      <!-- 3. SLANG QUIZ -->
+      <div class="game-panel" id="game-slang">
+        <div class="game-box">
+          <div class="game-top">
+            <h2 style="margin:0" data-es="Jerga dominicana">Slang Quiz</h2>
+            <div class="hud"><span><span data-es="Pregunta">Question</span>: <b id="s-q">0</b>/10</span><span><span data-es="Puntos">Score</span>: <b id="s-score">0</b></span><span><span data-es="Racha">Streak</span>: <b id="s-streak">0</b></span><span><span data-es="Mejor">Best</span>: <b id="s-best">0</b></span></div>
+          </div>
+          <div class="timer-bar"><i id="s-timer"></i></div>
+          <p class="quiz-q" id="s-word"><small data-es="Pulsa empezar para comenzar">Press start to begin</small></p>
+          <div class="options" id="s-options"></div>
+          <p class="map-feedback" id="s-feedback" aria-live="polite"></p>
+          <p style="text-align:center"><button class="btn" id="s-start" type="button" data-es="Empezar">Start</button> <button class="btn ghost" id="s-share" type="button" hidden data-es="Copiar resultado">Copy result</button></p>
+        </div>
+      </div>
+
+      <!-- 4. DOMINOES -->
+      <div class="game-panel" id="game-dominoes">
+        <div class="game-box">
+          <div class="game-top">
+            <h2 style="margin:0" data-es="Dominó">Dominoes</h2>
+            <div class="hud"><span><span data-es="Victorias">Wins</span>: <b id="d-wins">0</b></span><span><span data-es="Derrotas">Losses</span>: <b id="d-losses">0</b></span><span><span data-es="Pozo">Boneyard</span>: <b id="d-yard">0</b></span></div>
+          </div>
+          <div class="dom-area">
+            <div>
+              <p class="dom-status" style="margin:0" data-es="Rival">Opponent</p>
+              <div class="dom-opp" id="d-opp"></div>
+            </div>
+            <div class="dom-board" id="d-board" aria-label="Board"></div>
+            <p class="dom-status" id="d-status" aria-live="polite"></p>
+            <div class="end-pick" id="d-pick" hidden>
+              <button class="btn alt small" id="d-left" type="button" data-es="← Izquierda">← Left</button>
+              <button class="btn alt small" id="d-right" type="button" data-es="Derecha →">Right →</button>
+            </div>
+            <div class="dom-hand" id="d-hand" aria-label="Your tiles"></div>
+            <p style="text-align:center">
+              <button class="btn" id="d-new" type="button" data-es="Nueva partida">New game</button>
+              <button class="btn ghost" id="d-draw" type="button" disabled data-es="Robar del pozo">Draw tile</button>
+              <button class="btn ghost" id="d-pass" type="button" disabled data-es="Pasar">Pass</button>
+            </p>
+            <p class="lane-help" data-es="Reglas: tiras una ficha cuyo número coincida con un extremo. Si no puedes, robas del pozo. Gana quien se queda sin fichas, o quien tenga menos puntos si el juego se tranca.">Rules: play a tile whose number matches an end. If you cannot, draw from the boneyard. First to empty their hand wins, or the lowest pip total if the game locks.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="site-footer">
+  <div class="wrap cols">
+    <div><strong>Quisqueya</strong><br><small data-es="Un proyecto sobre la República Dominicana. Hecho con HTML, CSS y JavaScript.">A project about the Dominican Republic. Built with HTML, CSS and JavaScript.</small></div>
+    <div><a href="facts.html#credits" data-es="Créditos de fotos">Photo credits</a> · <a href="index.html" data-es="Volver arriba">Home</a></div>
+  </div>
+</footer>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script src="js/games.js"></script>
+
+</body>
+</html>
