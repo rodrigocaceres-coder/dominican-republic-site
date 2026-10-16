@@ -91,6 +91,51 @@ const PLACES = [
   }
 ];
 
+// Two more places, then outbound links for every place (info, map, tours, official site when one exists)
+PLACES.push(
+  {
+    id: "casa", cat: "beach", img: "casa", lon: -68.93, lat: 18.41,
+    name: { en: "Casa de Campo and Punta Minitas", es: "Casa de Campo y Punta Minitas" },
+    short: { en: "A seaside resort community with beaches, a marina and world-famous golf.", es: "Una comunidad turística frente al mar con playas, marina y golf de fama mundial." },
+    long: { en: "Near La Romana on the southeast coast, Casa de Campo is a huge resort community. Punta Minitas is its oceanfront area of villas beside Minitas Beach and Bahía Minitas. The property also has a marina, polo and horseback centers, and the Pete Dye designed Teeth of the Dog golf course. Altos de Chavón is just inside it.", es: "Cerca de La Romana, en la costa sureste, Casa de Campo es una enorme comunidad turística. Punta Minitas es su zona frente al mar, con villas junto a la playa y la bahía de Minitas. También tiene marina, centros de polo y equitación, y el campo de golf Teeth of the Dog, diseñado por Pete Dye. Altos de Chavón está dentro de la propiedad." },
+    best: { en: "Most facilities are for guests and residents, so check access before you go.", es: "La mayoría de las instalaciones son para huéspedes y residentes, confirma el acceso antes de ir." },
+    where: { en: "La Romana", es: "La Romana" }
+  },
+  {
+    id: "valle", cat: "nature", img: "valle", lon: -70.65, lat: 18.75,
+    name: { en: "Valle Nuevo National Park", es: "Parque Nacional Valle Nuevo" },
+    short: { en: "A cold, misty highland of pine forest where frost can appear.", es: "Una meseta fría y neblinosa de bosque de pinos donde puede aparecer la escarcha." },
+    long: { en: "A high plateau in the Cordillera Central with Hispaniolan pine forest, cloud forest and open grasslands. It is one of the coldest places in the country: winter nights can drop below freezing and cover the grass in frost. Rivers start here, and waterfalls like Aguas Blancas are nearby.", es: "Una meseta alta en la Cordillera Central con bosque de pino de La Española, bosque nublado y praderas abiertas. Es de los lugares más fríos del país: las noches de invierno pueden bajar de cero y cubrir la hierba de escarcha. Aquí nacen ríos y hay cascadas cercanas como Aguas Blancas." },
+    best: { en: "Bring warm layers, even if you start from the beach, and go with a guide.", es: "Lleva ropa abrigada, aunque salgas de la playa, y ve con un guía." },
+    where: { en: "Constanza, Cordillera Central", es: "Constanza, Cordillera Central" }
+  }
+);
+const PLACE_LINKS = {
+  colonial: { q: "Colonial Zone Santo Domingo", official: { url: "https://whc.unesco.org/en/list/526/", en: "UNESCO World Heritage page", es: "Página de la UNESCO" } },
+  limon: { q: "Salto El Limón" },
+  pico: { q: "Pico Duarte" },
+  puntacana: { q: "Punta Cana", official: { url: "https://www.puntacana.com/", en: "Punta Cana official site", es: "Sitio oficial de Punta Cana" } },
+  altos: { q: "Altos de Chavón", official: { url: "https://www.casadecampo.com.do/", en: "Casa de Campo official site", es: "Sitio oficial de Casa de Campo" } },
+  haitises: { q: "Los Haitises National Park" },
+  damajagua: { q: "27 Charcos de Damajagua" },
+  rincon: { q: "Playa Rincón Samaná" },
+  casa: { q: "Casa de Campo La Romana", official: { url: "https://www.casadecampo.com.do/", en: "Casa de Campo official site", es: "Sitio oficial de Casa de Campo" } },
+  valle: { q: "Valle Nuevo National Park", official: { url: "https://www.godominicanrepublic.com/things-to-do/valle-nuevo-national-park", en: "Official tourism page", es: "Página oficial de turismo" } }
+};
+PLACES.forEach((p) => Object.assign(p, PLACE_LINKS[p.id]));
+// Builds the outbound links for a place, in the current language
+function placeLinks(p) {
+  const q = encodeURIComponent(p.q);
+  const es = window.LANG === "es";
+  const out = [
+    { url: `https://${es ? "es" : "en"}.wikipedia.org/wiki/Special:Search?search=${q}&go=Go`, label: es ? "Más información" : "More info", kind: "info" },
+    { url: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.q + " Dominican Republic")}`, label: es ? "Ver en el mapa" : "Open in Maps", kind: "map" },
+    { url: `https://www.getyourguide.com/s/?q=${q}`, label: es ? "Tours y entradas" : "Tours and tickets", kind: "book" }
+  ];
+  if (p.official) out.unshift({ url: p.official.url, label: es ? p.official.es : p.official.en, kind: "official" });
+  return out;
+}
+
 const FACTS = [
   { en: "Santo Domingo is the oldest continuously inhabited European settlement in the Americas.", es: "Santo Domingo es el asentamiento europeo habitado de forma continua más antiguo de las Américas." },
   { en: "Pico Duarte, at 3,098 m (10,164 ft), is the highest mountain in the Caribbean.", es: "El Pico Duarte, con 3,098 m (10,164 pies), es la montaña más alta del Caribe." },
@@ -143,8 +188,6 @@ const SLANG = [
   { w: "Chercha", m: { en: "Lively chatter, a good time", es: "Conversación animada, buen ambiente" } },
   { w: "¿Qué lo qué?", m: { en: "What's up?", es: "¿Qué tal?" } }
 ];
-
-const GLOSSARY_EXTRA = SLANG; // glossary on the Culture page uses the same list
 
 // Cities and landmarks for the Map Challenge
 const CITIES = [

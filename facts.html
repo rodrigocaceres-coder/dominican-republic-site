@@ -25,6 +25,7 @@
       <a href="index.html" data-es="Inicio">Home</a>
       <a href="explore.html" data-es="Explorar">Explore</a>
       <a href="culture.html" data-es="Cultura">Culture</a>
+      <a href="legends.html" data-es="Leyendas">Legends</a>
       <a href="games.html" data-es="Juegos">Games</a>
       <a href="facts.html" data-es="Datos">Facts</a>
     </nav>
@@ -38,6 +39,16 @@
       <p data-es="Información general, datos curiosos y una prueba rápida para ver cuánto aprendiste.">General info, fun facts and a quick quiz to see what you learned.</p>
     </div>
   </header>
+
+  <section class="tinted">
+    <div class="wrap">
+      <div class="fact-box reveal">
+        <p class="eyebrow" style="color:#ffd166" data-es="Dato curioso">Fun fact</p>
+        <div class="fact-text"><p id="fact-text" aria-live="polite"></p></div>
+        <button class="btn" id="fact-btn" type="button" data-es="Otro dato">Another fact</button>
+      </div>
+    </div>
+  </section>
 
   <section>
     <div class="wrap">
@@ -58,15 +69,6 @@
     </div>
   </section>
 
-  <section class="tinted">
-    <div class="wrap">
-      <div class="fact-box reveal">
-        <p class="eyebrow" style="color:#ffd166" data-es="Dato curioso">Fun fact</p>
-        <div class="fact-text"><p id="fact-text" aria-live="polite"></p></div>
-        <button class="btn" id="fact-btn" type="button" data-es="Otro dato">Another fact</button>
-      </div>
-    </div>
-  </section>
 
   <section>
     <div class="wrap">
@@ -97,14 +99,33 @@
         <table class="credits">
           <thead><tr><th data-es="Imagen">Image</th><th data-es="Autor">Author</th><th data-es="Licencia">License</th></tr></thead>
           <tbody>
-            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Calle_las_Damas,_Santo_Domingo,_Zona_Colonial.jpg">Calle las Damas, Zona Colonial</a></td><td>Desox7x</td><td>CC0</td></tr>
-            <tr><td><a href="https://commons.wikimedia.org/wiki/File:DOM_Santa_B%C3%A1rbara_de_Saman%C3%A1,_El_Lim%C3%B3n,_Monumento_Natural_Salto_El_Lim%C3%B3n_0018.jpg">Salto El Limón</a></td><td>-wuppertaler</td><td>CC BY 4.0</td></tr>
-            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Pico_Duarte.jpg">Pico Duarte</a></td><td>Adrian Michael</td><td>CC BY-SA 3.0</td></tr>
-            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Punta_Cana_Beach_01.jpg">Punta Cana Beach</a></td><td>NoonIcarus</td><td>CC BY-SA 3.0</td></tr>
-            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Altos_de_Chavon_1.jpg">Altos de Chavón</a></td><td>Andreas Volkmer</td><td data-es="Dominio público">Public domain</td></tr>
-            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Los_Haitises_Park.jpeg">Los Haitises</a></td><td>Anton Bielousov</td><td>CC BY-SA 3.0</td></tr>
-            <tr><td><a href="https://commons.wikimedia.org/wiki/File:27_Charcas_rio_Damajagua_-_panoramio.jpg">27 Charcos de Damajagua</a></td><td>kikeam71</td><td>CC BY-SA 3.0</td></tr>
-            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Playa_Rinc%C3%B3n_Dec_2020.jpg">Playa Rincón</a></td><td>Danu Widjajanto</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Calle_las_Damas,_Santo_Domingo,_Zona_Colonial.jpg" rel="noopener">Calle Las Damas, Zona Colonial</a></td><td>Desox7x</td><td>CC0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:DOM_Santa_B%C3%A1rbara_de_Saman%C3%A1,_El_Lim%C3%B3n,_Monumento_Natural_Salto_El_Lim%C3%B3n_0018.jpg" rel="noopener">Salto El Limón</a></td><td>-wuppertaler</td><td>CC BY 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Pico_Duarte.jpg" rel="noopener">Pico Duarte</a></td><td>Adrian Michael</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Punta_Cana_Beach_01.jpg" rel="noopener">Punta Cana Beach</a></td><td>NoonIcarus</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Altos_de_Chavon_1.jpg" rel="noopener">Altos de Chavón</a></td><td>Andreas Volkmer</td><td data-es="Dominio público">Public domain</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Los_Haitises_Park.jpeg" rel="noopener">Los Haitises</a></td><td>Anton Bielousov</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:27_Charcas_rio_Damajagua_-_panoramio.jpg" rel="noopener">27 Charcos de Damajagua</a></td><td>kikeam71</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Playa_Rinc%C3%B3n_Dec_2020.jpg" rel="noopener">Playa Rincón</a></td><td>Danu Widjajanto</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Constanza,_valle_nuevo,_clima_invierno..jpg" rel="noopener">Valle Nuevo</a></td><td>Rhachell-84</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Beach_in_Casa_De_Campo,_Dominican_Republic_(51908230116).jpg" rel="noopener">Beach at Casa de Campo</a></td><td>Sergiy Galyonkin from Raleigh, USA</td><td>CC BY-SA 2.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Bas%C3%ADlica_Nuestra_Se%C3%B1ora_de_la_Altagracia_(Hig%C3%BCey).jpg" rel="noopener">Basílica de Higüey</a></td><td>Jcaraballo</td><td>CC0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Montecristi_Dominican_Republic_El_Morro_4.jpg" rel="noopener">El Morro, Monte Cristi</a></td><td>Ultimo1988</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Bahia_de_las_Aguilas.jpg" rel="noopener">Bahía de las Águilas</a></td><td>Scmjht</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Lago_Enriquillo.jpg" rel="noopener">Lago Enriquillo</a></td><td>Juan Alberto Silver</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Salto_Jimenoa_300.jpg" rel="noopener">Salto Jimenoa</a></td><td>Jos1950</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Cabarete_beach_-_panoramio.jpg" rel="noopener">Cabarete</a></td><td>Maris Teteris</td><td>CC BY 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Isla_Saona_Dominican_Republic.jpg" rel="noopener">Isla Saona</a></td><td>https://www.flickr.com/photos/bez_uk/</td><td>CC BY-SA 2.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Santiago_de_los_Caballeros_-_Monumento_a_los_H%C3%A9roes_de_la_Restauraci%C3%B3n_0459.JPG" rel="noopener">Monumento, Santiago</a></td><td>Phyrexian</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Mother_Humpback_Whale_in_Saman%C3%A1_Bay,_Dominican_Republic.jpg" rel="noopener">Humpback whale, Samaná Bay</a></td><td>Caballero1967</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Las_Terrenas_beach_7.JPG" rel="noopener">Las Terrenas</a></td><td>Captain-tucker</td><td>CC BY-SA 3.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Estadio_Tetelo_Vargas.jpg" rel="noopener">Estadio Tetelo Vargas</a></td><td>Ronny Medina</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:CARNAVAL_VEGANO_2020.jpg" rel="noopener">Carnaval Vegano</a></td><td>Estefanía Moronta</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Sancocho_Dominicano.jpg" rel="noopener">Sancocho dominicano</a></td><td>LittleT889</td><td>CC BY-SA 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Dominican_Mangu.jpg" rel="noopener">Mangú</a></td><td>Ll1324</td><td>CC0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:Puerto_Plata,_Dominican_Republic.jpg" rel="noopener">Puerto Plata</a></td><td>https://www.flickr.com/photos/magalie/</td><td>CC BY-SA 2.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:DOM_Boca_Chica,_Playa_Boca_Chica_0005.jpg" rel="noopener">Boca Chica</a></td><td>-wuppertaler</td><td>CC BY 4.0</td></tr>
+            <tr><td><a href="https://commons.wikimedia.org/wiki/File:DOM_Santo_Domingo,_Paseo_Mar%C3%ADtimo_Malec%C3%B3n_0009.jpg" rel="noopener">Malecón, Santo Domingo</a></td><td>-wuppertaler</td><td>CC BY 4.0</td></tr>
           </tbody>
         </table>
       </div>

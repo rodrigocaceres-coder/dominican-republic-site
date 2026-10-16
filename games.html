@@ -9,6 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Nunito+Sans:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/styles.css">
 <title>Games | Quisqueya</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
 <meta name="description" content="Four games inspired by Dominican culture: merengue rhythm, map challenge, slang quiz and dominoes.">
 </head>
 <body>
@@ -25,6 +26,7 @@
       <a href="index.html" data-es="Inicio">Home</a>
       <a href="explore.html" data-es="Explorar">Explore</a>
       <a href="culture.html" data-es="Cultura">Culture</a>
+      <a href="legends.html" data-es="Leyendas">Legends</a>
       <a href="games.html" data-es="Juegos">Games</a>
       <a href="facts.html" data-es="Datos">Facts</a>
     </nav>
@@ -56,10 +58,17 @@
             <h2 style="margin:0" data-es="Ritmo de merengue">Merengue Rhythm</h2>
             <div class="hud"><span><span data-es="Puntos">Score</span>: <b id="r-score">0</b></span><span>Combo: <b id="r-combo">0</b></span><span><span data-es="Mejor">Best</span>: <b id="r-best">0</b></span></div>
           </div>
+          <div class="toolbar" role="group" aria-label="Difficulty" style="justify-content:center">
+            <span class="muted" data-es="Dificultad:">Difficulty:</span>
+            <button class="chip" data-level="easy" aria-pressed="true" type="button" data-es="Fácil">Easy</button>
+            <button class="chip" data-level="medium" aria-pressed="false" type="button" data-es="Medio">Medium</button>
+            <button class="chip" data-level="hard" aria-pressed="false" type="button" data-es="Difícil">Hard</button>
+          </div>
           <canvas id="rhythm-canvas" width="560" height="600" aria-label="Merengue rhythm game"></canvas>
           <div class="judge" id="r-judge" aria-live="polite"></div>
-          <p class="lane-help" data-es="Toca las teclas D F J K (o toca cada carril) cuando las notas lleguen a la línea. Tambora, güira, conga y acordeón.">Press D F J K (or tap each lane) when the notes reach the line. Tambora, güira, conga and accordion.</p>
+          <p class="lane-help"><span data-es="Teclas:">Keys:</span> <strong id="r-keys">F  J</strong> · <span data-es="o toca cada carril. La banda (tambora, güira, bajo, acordeón y saxofón) toca sola; tú pones el ritmo encima.">or tap each lane. The band (tambora, güira, bass, accordion and sax) plays on its own, you add rhythm on top.</span></p>
           <p style="text-align:center"><button class="btn" id="r-start" type="button" data-es="Empezar">Start</button></p>
+          <p class="lane-help" data-es="La música es un merengue sintetizado en vivo en tu navegador, no una grabación.">The music is a merengue synthesized live in your browser, not a recording.</p>
         </div>
       </div>
 
@@ -70,10 +79,22 @@
             <h2 style="margin:0" data-es="Reto del mapa">Map Challenge</h2>
             <div class="hud"><span><span data-es="Ronda">Round</span>: <b id="m-round">0</b>/10</span><span><span data-es="Puntos">Score</span>: <b id="m-score">0</b></span><span><span data-es="Mejor">Best</span>: <b id="m-best">0</b></span></div>
           </div>
-          <p class="map-target"><span data-es="Encuentra:">Find:</span> <span id="m-target">...</span></p>
-          <div class="map-wrap"><svg id="challenge-svg" viewBox="0 0 900 680" role="img" aria-label="Click the map to answer"></svg></div>
-          <p class="map-feedback" id="m-feedback" aria-live="polite"></p>
-          <p style="text-align:center"><button class="btn" id="m-next" type="button" data-es="Empezar">Start</button></p>
+          <div class="mg-layout">
+            <figure class="mg-card">
+              <img id="mg-img" src="images/colonial.jpg" alt="" width="640" height="480">
+              <figcaption>
+                <span class="eyebrow" data-es="¿Dónde está esto?">Where is this?</span>
+                <strong id="mg-name" data-es="Pulsa empezar">Press start</strong>
+              </figcaption>
+            </figure>
+            <div class="mg-mapwrap">
+              <div id="mg-map" role="application" aria-label="Map: click to place your guess" data-es-alt=""></div>
+              <p class="mg-offline" id="mg-offline" hidden data-es="No se pudo cargar el mapa. Revisa tu conexión a internet.">The map could not load. Check your internet connection.</p>
+            </div>
+          </div>
+          <p class="map-feedback" id="m-feedback" aria-live="polite" data-es="Haz clic en el mapa para marcar tu respuesta.">Click the map to place your guess.</p>
+          <p style="text-align:center"><button class="btn alt" id="m-guess" type="button" disabled data-es="Confirmar respuesta">Lock in guess</button> <button class="btn" id="m-next" type="button" data-es="Empezar">Start</button></p>
+          <p class="lane-help" data-es="Mapa real de Esri, sin nombres de lugares, con vista de satélite opcional. Más cerca = más puntos (hasta 100 por ronda).">A real Esri map with no place names, plus an optional satellite view. Closer means more points (up to 100 per round).</p>
         </div>
       </div>
 
@@ -99,25 +120,33 @@
             <h2 style="margin:0" data-es="Dominó">Dominoes</h2>
             <div class="hud"><span><span data-es="Victorias">Wins</span>: <b id="d-wins">0</b></span><span><span data-es="Derrotas">Losses</span>: <b id="d-losses">0</b></span><span><span data-es="Pozo">Boneyard</span>: <b id="d-yard">0</b></span></div>
           </div>
-          <div class="dom-area">
-            <div>
-              <p class="dom-status" style="margin:0" data-es="Rival">Opponent</p>
-              <div class="dom-opp" id="d-opp"></div>
+          <div class="dom-frame">
+            <div class="dom-table">
+              <div class="dom-opp">
+                <span class="dom-name"><span data-es="Rival">Rival</span> · <b id="d-opp-count">7</b></span>
+                <div class="dom-opp-tiles" id="d-opp-tiles"></div>
+              </div>
+              <div class="dom-ends" id="d-ends"></div>
+              <div class="dom-board" id="d-board" aria-label="Board" data-es-alt=""></div>
+              <div class="dom-msg" id="d-status" aria-live="polite"></div>
+              <div class="dom-pick" id="d-pick" hidden>
+                <button class="btn small" id="d-pick-l" type="button">←</button>
+                <button class="btn small" id="d-pick-r" type="button">→</button>
+              </div>
+              <div class="dom-hand" id="d-hand" aria-label="Your tiles"></div>
+              <div class="dom-over" id="d-over" hidden>
+                <h3 id="d-over-title"></h3>
+                <p id="d-over-sub"></p>
+                <button class="btn" id="d-again" type="button" data-es="Jugar otra vez">Play again</button>
+              </div>
             </div>
-            <div class="dom-board" id="d-board" aria-label="Board"></div>
-            <p class="dom-status" id="d-status" aria-live="polite"></p>
-            <div class="end-pick" id="d-pick" hidden>
-              <button class="btn alt small" id="d-left" type="button" data-es="← Izquierda">← Left</button>
-              <button class="btn alt small" id="d-right" type="button" data-es="Derecha →">Right →</button>
-            </div>
-            <div class="dom-hand" id="d-hand" aria-label="Your tiles"></div>
-            <p style="text-align:center">
-              <button class="btn" id="d-new" type="button" data-es="Nueva partida">New game</button>
-              <button class="btn ghost" id="d-draw" type="button" disabled data-es="Robar del pozo">Draw tile</button>
-              <button class="btn ghost" id="d-pass" type="button" disabled data-es="Pasar">Pass</button>
-            </p>
-            <p class="lane-help" data-es="Reglas: tiras una ficha cuyo número coincida con un extremo. Si no puedes, robas del pozo. Gana quien se queda sin fichas, o quien tenga menos puntos si el juego se tranca.">Rules: play a tile whose number matches an end. If you cannot, draw from the boneyard. First to empty their hand wins, or the lowest pip total if the game locks.</p>
           </div>
+          <p class="dom-controls">
+            <button class="btn" id="d-new" type="button" data-es="Nueva partida">New game</button>
+            <button class="btn alt" id="d-draw" type="button" disabled data-es="Robar del pozo">Draw tile</button>
+            <button class="btn ghost" id="d-pass" type="button" disabled data-es="Pasar">Pass</button>
+          </p>
+          <p class="lane-help" data-es="Reglas: juega una ficha cuyo número coincida con un extremo. Si no puedes, roba del pozo. Gana quien se queda sin fichas, o quien tenga menos puntos si el juego se tranca.">Rules: play a tile whose number matches an open end. If you cannot, draw from the boneyard. First to empty their hand wins, or the lowest pip total if the game locks.</p>
         </div>
       </div>
     </div>
@@ -131,7 +160,11 @@
 </footer>
 <script src="js/data.js"></script>
 <script src="js/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="js/mapgame.js"></script>
 <script src="js/games.js"></script>
+<script src="js/dominoes.js"></script>
+<script src="js/rhythm.js"></script>
 
 </body>
 </html>

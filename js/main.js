@@ -157,6 +157,14 @@
       $("#modal-text").textContent = tr(p.long);
       $("#modal-where").textContent = tr(p.where);
       $("#modal-best").textContent = tr(p.best);
+      const links = $("#modal-links"); links.innerHTML = "";
+      placeLinks(p).forEach((l) => {
+        const a = document.createElement("a");
+        a.href = l.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+        a.className = "btn small " + (l.kind === "book" ? "" : l.kind === "official" ? "alt" : "ghost");
+        a.textContent = l.label + " ↗";
+        links.appendChild(a);
+      });
       back.classList.add("open");
       $("#modal-close").focus();
       back.dataset.current = p.id;
