@@ -225,10 +225,10 @@
       target.hit = true; combo++;
       const pts = bestD <= win[0] ? 100 : bestD <= win[1] ? 70 : 40;
       score += pts + Math.min(combo, 20) * 2;
-      showJudge(pts === 100 ? L("¡Perfecto!", "¡Perfecto!") : pts === 70 ? L("¡Bien!", "¡Bien!") : L("¡Casi!", "¡Casi!"), pts === 100 ? "#4fc98a" : pts === 70 ? "#e8a317" : "#aeb8d0");
+      showJudge(pts === 100 ? L("Perfect!", "¡Perfecto!") : pts === 70 ? L("Good!", "¡Bien!") : L("Almost!", "¡Casi!"), pts === 100 ? "#4fc98a" : pts === 70 ? "#e8a317" : "#aeb8d0");
       playerSound(cfg.lanes[l], target.bar);
     } else {
-      if (!cfg.forgiving) { combo = 0; showJudge(L("Fuera de ritmo", "Fuera de ritmo"), "#ff5a6b"); }
+      if (!cfg.forgiving) { combo = 0; showJudge(L("Off the beat", "Fuera de ritmo"), "#ff5a6b"); }
       playerSound(cfg.lanes[l], curBar);
     }
     updateHud();

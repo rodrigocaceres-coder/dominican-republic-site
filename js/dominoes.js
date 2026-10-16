@@ -10,8 +10,9 @@
   if (!$("#d-board")) return;
 
   const PIPS = { 0: [], 1: [4], 2: [2, 6], 3: [2, 4, 6], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
-  // Layout constants, in percent of the square table
-  const TW = 9, STEP = 9.4, LEFT = 2.5, ROW = 5.4, CY = 40, CENTER_X = 45.5, PER_SIDE = 4, PER_ROW = 10;
+  // Board geometry: a grid of square cells on the square table. A tile covers two cells.
+  const CELL = 4.2, COLS = 22, ROWS = 12, PAD_X = (100 - COLS * CELL) / 2, TOP = 17, CENTER_ROW = 5;
+  const CENTER_COL = COLS / 2 - 1;          // the first tile covers CENTER_COL and CENTER_COL + 1
 
   let yard, mine, theirs, board, start, turn, over, picked, passes, lastTile, statusKey, fresh = null;
   let wins = Number(store.get("dr-dom-wins", 0)), losses = Number(store.get("dr-dom-losses", 0));
@@ -41,27 +42,62 @@
     return el;
   }
 
-  /* Chain layout: the first tile sits in the middle. The right arm runs right,
-     then drops a row and comes back left. The left arm runs left, then climbs a row and goes right. */
-  function slot(arm, k) {
-    if (k <= PER_SIDE) return { x: arm === "r" ? CENTER_X + k * STEP : CENTER_X - k * STEP, y: CY, flip: false };
-    const m = k - PER_SIDE - 1, row = Math.floor(m / PER_ROW) + 1, c = m % PER_ROW;
-    if (arm === "r") return { x: LEFT + (PER_ROW - 1 - c) * STEP, y: CY + row * ROW, flip: true };
-    return { x: LEFT + c * STEP, y: CY - row * ROW, flip: true };
+  /* Chain layout: the first tile sits in the middle. Each arm runs straight until it reaches the edge,
+     then takes a perpendicular turn (a tile laid at 90 degrees), steps over and carries on the other way.
+     The right arm turns clockwise: right, down, left, up. The left arm mirrors it: left, up, right, down. */
+  const add = (c, v) => ({ x: c.x + v.x, y: c.y + v.y });
+  const mul = (v, n) => ({ x: v.x * n, y: v.y * n });
+  const cw = (v) => ({ x: -v.y, y: v.x });
+  const ccw = (v) => ({ x: v.y, y: -v.x });
+  const ck = (c) => c.x + "," + c.y;
+  const inBounds = (c) => c.x >= 0 && c.x < COLS && c.y >= 0 && c.y < ROWS;
+
+  function walkArm(count, head, dir, occupied) {
+    const out = [];
+    let turning = false;
+    const free = (c) => inBounds(c) && !occupied.has(ck(c));
+    for (let i = 0; i < count; i++) {
+      let cells = null;
+      if (!turning && free(add(head, dir)) && free(add(head, mul(dir, 2))) && inBounds(add(head, mul(dir, 3)))) {
+        cells = [add(head, dir), add(head, mul(dir, 2))]; head = cells[1];
+      } else {
+        // perpendicular turn: a tile laid sideways, starting right after the last cell
+        for (const rot of [cw, ccw]) {
+          const d2 = rot(dir), c1 = add(head, dir), c2 = add(c1, d2);
+          if (free(c1) && free(c2)) { cells = [c1, c2]; head = c2; dir = d2; turning = !turning; break; }
+        }
+        if (!cells) { cells = [add(head, dir), add(head, mul(dir, 2))]; head = cells[1]; turning = false; }   // last resort
+      }
+      cells.forEach((c) => occupied.add(ck(c)));
+      out.push({ cells, dir: { x: cells[1].x - cells[0].x, y: cells[1].y - cells[0].y } });
+    }
+    return out;
+  }
+  function layoutBoard() {
+    const first = [{ x: CENTER_COL, y: CENTER_ROW }, { x: CENTER_COL + 1, y: CENTER_ROW }];
+    const occupied = new Set(first.map(ck));
+    const left = walkArm(start, first[0], { x: -1, y: 0 }, occupied);
+    const right = walkArm(board.length - 1 - start, first[1], { x: 1, y: 0 }, occupied);
+    return { first, left, right };
   }
 
   function render() {
     $("#d-wins").textContent = wins; $("#d-losses").textContent = losses; $("#d-yard").textContent = yard.length;
     const b = $("#d-board"); b.innerHTML = "";
-    board.forEach((t, i) => {
-      let pos;
-      if (i === start) pos = { x: CENTER_X, y: CY, flip: false };
-      else if (i > start) pos = slot("r", i - start);
-      else pos = slot("l", start - i);
-      const el = tileEl(t, "laid" + (t === lastTile ? " last" : "") + (t === fresh ? " fresh" : ""), pos.flip);
-      el.style.left = pos.x + "%"; el.style.top = pos.y + "%";
+    const lay = layoutBoard();
+    const put = (t, p, arm, i) => {
+      const [c1, c2] = p.cells, vertical = p.dir.y !== 0;
+      const positive = p.dir.x > 0 || p.dir.y > 0;      // reading order of the two cells
+      // right arm: near cell shows a, far cell shows b. Left arm: the other way round.
+      const flip = arm === "r" ? !positive : positive;
+      const el = tileEl(t, "laid board-tile" + (vertical ? " v" : "") + (t === lastTile ? " last" : "") + (t === fresh ? " fresh" : ""), arm === "c" ? false : flip);
+      el.style.left = (PAD_X + Math.min(c1.x, c2.x) * CELL) + "%";
+      el.style.top = (TOP + Math.min(c1.y, c2.y) * CELL) + "%";
       b.appendChild(el);
-    });
+    };
+    put(board[start], { cells: lay.first, dir: { x: 1, y: 0 } }, "c");
+    lay.left.forEach((p, i) => put(board[start - 1 - i], p, "l"));
+    lay.right.forEach((p, i) => put(board[start + 1 + i], p, "r"));
     fresh = null;
     if (board.length) {
       const e = ends();

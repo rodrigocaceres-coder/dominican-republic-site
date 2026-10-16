@@ -46,7 +46,7 @@
       locked = false;
       const item = order[qi];
       $("#s-q").textContent = qi + 1; $("#s-score").textContent = score; $("#s-streak").textContent = streak;
-      $("#s-word").innerHTML = `${item.w}<small>${L("¿Qué significa?", "¿Qué significa?")}</small>`;
+      $("#s-word").innerHTML = `${item.w}<small>${L("What does it mean?", "¿Qué significa?")}</small>`;
       $("#s-feedback").textContent = "";
       const wrong = SLANG.filter((s) => s !== item).sort(() => Math.random() - 0.5).slice(0, 3);
       const opts = [item, ...wrong].sort(() => Math.random() - 0.5);
@@ -80,11 +80,11 @@
         streak++; correct++; bestStreak = Math.max(bestStreak, streak);
         const pts = 10 + Math.round(left) + Math.min(streak, 5) * 2;
         score += pts;
-        $("#s-feedback").textContent = L(`¡Correcto! +${pts}`, `¡Correcto! +${pts}`);
+        $("#s-feedback").textContent = L(`Correct! +${pts}`, `¡Correcto! +${pts}`);
       } else {
         streak = 0;
         if (btn) btn.classList.add("wrong");
-        $("#s-feedback").textContent = btn ? L("Casi. Esa no era.", "Casi. Esa no era.") : L("Se acabó el tiempo.", "Se acabó el tiempo.");
+        $("#s-feedback").textContent = btn ? L("Not quite. That was not it.", "Casi. Esa no era.") : L("Time is up.", "Se acabó el tiempo.");
       }
       $("#s-score").textContent = score; $("#s-streak").textContent = streak;
       setTimeout(() => { qi++; ask(); }, 1300);
@@ -92,7 +92,7 @@
     function finish() {
       locked = true;
       if (score > best) { best = score; store.set("dr-best-slang", best); $("#s-best").textContent = best; }
-      $("#s-word").innerHTML = `${L("¡Terminaste!", "¡Terminaste!")}<small>${correct}/10 · ${L("racha máxima", "racha máxima")} ${bestStreak} · ${score}</small>`;
+      $("#s-word").innerHTML = `${L("All done!", "¡Terminaste!")}<small>${correct}/10 · ${L("best streak", "racha máxima")} ${bestStreak} · ${score}</small>`;
       $("#s-options").innerHTML = "";
       $("#s-timer").style.transform = "scaleX(0)";
       $("#s-start").hidden = false; $("#s-start").textContent = window.LANG === "es" ? "Jugar otra vez" : "Play again";

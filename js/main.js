@@ -65,6 +65,8 @@
     });
 
     initReveal();
+    initImages();
+    initToTop();
     initCounters();
     initFactBox();
     initPlaces();
@@ -73,6 +75,27 @@
     initTrueFalse();
     applyLang();
   });
+
+  /* ---------- Images fade in when they finish loading ---------- */
+  function initImages() {
+    $$("img[loading='lazy']").forEach((img) => {
+      if (img.complete && img.naturalWidth) return;
+      img.classList.add("img-fade");
+      const done = () => img.classList.add("loaded");
+      img.addEventListener("load", done, { once: true });
+      img.addEventListener("error", done, { once: true });
+    });
+  }
+
+  /* ---------- Back to top ---------- */
+  function initToTop() {
+    const b = document.createElement("button");
+    b.className = "to-top"; b.type = "button"; b.textContent = "↑"; b.setAttribute("aria-label", "Back to top");
+    b.addEventListener("click", () => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }));
+    document.body.appendChild(b);
+    const update = () => b.classList.toggle("show", window.scrollY > 700);
+    window.addEventListener("scroll", update, { passive: true }); update();
+  }
 
   /* ---------- Scroll reveal ---------- */
   function initReveal() {
@@ -88,6 +111,7 @@
   function initCounters() {
     const nums = $$("[data-count]");
     if (!nums.length) return;
+    nums.forEach((n) => { n.textContent = "0"; });
     const run = (el) => {
       const end = Number(el.dataset.count), dur = 1200, t0 = performance.now();
       const step = (t) => {

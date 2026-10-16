@@ -443,6 +443,12 @@
   }
   tripBtn?.addEventListener("click", () => (tripping ? stopTrip() : startTrip()));
 
+  // On touch screens there is no Ctrl + scroll: say "pinch" instead
+  if (window.matchMedia && matchMedia("(pointer: coarse)").matches) {
+    const hint = svg.parentElement.querySelector(".map-hint");
+    if (hint) { hint.textContent = "Tap a pin · drag to move · pinch to zoom"; hint.dataset.es = "Toca un pin · arrastra para mover · pellizca para acercar"; }
+  }
+
   /* ---------- Language ---------- */
   // Explore page: the card filters and search also filter the pins, and closing the modal clears the selection
   document.addEventListener("placesfilter", (e) => {

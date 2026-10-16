@@ -151,9 +151,14 @@
   let cat = "all", query = "", current = null;
   const grid = $("#legend-grid");
 
+  // People who have a photo in images/people/. Everyone else gets a monogram badge.
+  const PHOTOS = new Set(["alfa", "beltre", "felix", "horford", "juanluis", "julia", "junot", "marichal", "marileidy", "milly", "ortiz", "oscar", "pedro", "pujols", "romeo", "sosa", "soto", "tatis", "ventura", "vladimir", "zoe"]);
   function avatar(p) {
     const c = CATS[p.cat].color;
-    return `<div class="avatar" style="background: linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 50%, #0b1d44))" aria-hidden="true">${p.init}</div>`;
+    const pos = { pedro: "center 32%", vladimir: "center 32%", oscar: "center 20%", beltre: "center 28%", felix: "center 24%" }[p.id] || "center 22%";
+    const bg = `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 50%, #0b1d44))`;
+    if (PHOTOS.has(p.id)) return `<div class="avatar has-photo" style="background:${bg}"><img src="images/people/${p.id}.jpg" alt="${p.name}" style="object-position:${pos}" loading="lazy" onerror="this.remove()"><span aria-hidden="true">${p.init}</span></div>`;
+    return `<div class="avatar" style="background: ${bg}" aria-hidden="true">${p.init}</div>`;
   }
   function statChips(p) {
     return p.stats.map(([v, l]) => `<span class="stat-chip"><b>${v}</b> ${tr(l)}</span>`).join("");
