@@ -167,7 +167,7 @@
   let score = 0, combo = 0, flash = [], best = 0, judgeTimer = 0, finished = false, resultMsg = "";
   const clock = () => performance.now() / 1000;
   const laneCount = () => cfg.lanes.length;
-  const laneW = () => Math.min(150, W / laneCount());
+  const laneW = () => Math.min(190, W / laneCount());
   const laneX = (i) => (W - laneW() * laneCount()) / 2 + i * laneW();
   const noteTime = (n) => perfStart + (n.bar * 8 + n.pos) * stepDur;
 

@@ -270,7 +270,7 @@
     const item = qs[qi];
     $("#wq-n").textContent = qi + 1; $("#wq-score").textContent = qscore;
     $("#wq-clue").textContent = `"${L(item.en, item.es)}"`;
-    $("#wq-feedback").textContent = "";
+    $("#wq-feedback").innerHTML = "";
     const right = PEOPLE.find((p) => p.id === item.id);
     const wrong = PEOPLE.filter((p) => p.cat === right.cat || Math.random() < 0.3).filter((p) => p !== right).sort(() => Math.random() - 0.5).slice(0, 3);
     const opts = [right, ...wrong].sort(() => Math.random() - 0.5);
@@ -284,8 +284,9 @@
         $$(".opt", box).forEach((x) => { x.disabled = true; if (x.textContent === right.name) x.classList.add("correct"); });
         if (!ok) b.classList.add("wrong");
         $("#wq-score").textContent = qscore;
-        $("#wq-feedback").textContent = ok ? L("Correct!", "¡Correcto!") : L(`It was ${right.name}.`, `Era ${right.name}.`);
-        setTimeout(() => { qi++; wqAsk(); }, 1500);
+        const fb = $("#wq-feedback");
+        fb.innerHTML = `<span class="reveal-person ${ok ? "good" : "bad"}">${avatar(right)}<span><b>${ok ? L("Correct!", "¡Correcto!") : L("Not this time", "Esta vez no")}</b><br>${L("It is", "Es")} ${right.name} · ${tr(right.role)}</span></span>`;
+        setTimeout(() => { qi++; wqAsk(); }, 2600);
       });
       box.appendChild(b);
     });
