@@ -43,8 +43,57 @@
     </div>
   </header>
 
+  <section class="home-map" id="map-stage" aria-labelledby="map-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <p class="eyebrow" data-es="Mapa interactivo">Interactive map</p>
+        <h2 id="map-title" data-es="Toca la isla y descubre">Tap the island and discover</h2>
+        <p class="lead" data-es="Más de 20 lugares escondidos en el mapa. Filtra por tema, viaja por los meses del año o sube al carro para un viaje por todo el país.">More than 20 spots hidden on the map. Filter by theme, slide through the months of the year, or hop in the car for a trip across the country.</p>
+      </div>
+
+      <div class="map-controls">
+        <div class="chip-row" id="map-chips" role="group" aria-label="Map filters"></div>
+        <div class="month-box">
+          <label for="month-range"><span data-es="¿Qué pasa en...?">What's happening in...</span> <strong id="month-name"></strong></label>
+          <input type="range" id="month-range" min="1" max="12" step="1" value="1">
+          <div class="month-events" id="month-events" aria-live="polite"></div>
+        </div>
+        <button class="btn" id="trip-btn" type="button">🚗 Start road trip</button>
+      </div>
+
+      <div class="map-layout">
+        <div class="map-wrap big-map">
+          <svg id="home-map" viewBox="0 0 900 680" role="group" aria-label="Interactive map of the Dominican Republic" data-es-aria="Mapa interactivo de la República Dominicana"></svg>
+        </div>
+        <aside class="spot-panel" id="spot-panel" aria-live="polite">
+          <div id="sp-welcome" class="sp-welcome">
+            <div class="big-emoji" aria-hidden="true">🧭</div>
+            <h3 data-es="¿Por dónde empezamos?">Where shall we start?</h3>
+            <p data-es="Toca cualquier punto del mapa. Los que brillan están pasando ahora mismo según el mes que elegiste.">Tap any pin on the map. Glowing ones are happening right now, based on the month you picked.</p>
+            <button class="btn alt" id="sp-random-2" type="button" data-es="🎲 Sorpréndeme">🎲 Surprise me</button>
+          </div>
+          <div id="sp-detail" hidden>
+            <div class="spot-photo" id="sp-photo"></div>
+            <div class="spot-body">
+              <div class="spot-tags"><span class="tag" id="sp-cat"></span><span class="now-badge" id="sp-now" hidden></span></div>
+              <h3 id="sp-name"></h3>
+              <p id="sp-text"></p>
+              <p class="spot-fact"><strong data-es="¿Sabías que?">Did you know?</strong> <span id="sp-fact"></span></p>
+              <p class="spot-dist" id="sp-dist"></p>
+              <div class="spot-actions">
+                <button class="btn small ghost" id="sp-prev" type="button" data-es="← Anterior">← Previous</button>
+                <button class="btn small alt" id="sp-random" type="button" data-es="🎲 Sorpréndeme">🎲 Surprise me</button>
+                <button class="btn small ghost" id="sp-next" type="button" data-es="Siguiente →">Next →</button>
+              </div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
   <div class="wrap">
-    <div class="stats">
+    <div class="stats flat">
       <div class="stat"><div class="num" data-count="48671">0</div><div class="label" data-es="km² de superficie">km² in area</div></div>
       <div class="stat"><div class="num" data-count="3098">0</div><div class="label" data-es="metros en el Pico Duarte">meters at Pico Duarte</div></div>
       <div class="stat"><div class="num" data-count="1500">0</div><div class="label" data-es="km de costa aprox.">km of coastline (approx.)</div></div>
@@ -118,6 +167,7 @@
 </footer>
 <script src="js/data.js"></script>
 <script src="js/main.js"></script>
+<script src="js/homemap.js"></script>
 
 </body>
 </html>
