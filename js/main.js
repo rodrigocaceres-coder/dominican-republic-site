@@ -64,6 +64,9 @@
       toggle.setAttribute("aria-expanded", open);
     });
 
+    const header = $(".site-header");
+    const onScroll = () => header?.classList.toggle("scrolled", window.scrollY > 8);
+    window.addEventListener("scroll", onScroll, { passive: true }); onScroll();
     initReveal();
     initImages();
     initToTop();

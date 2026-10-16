@@ -152,6 +152,7 @@
   const grid = $("#legend-grid");
 
   // People who have a photo in images/people/. Everyone else gets a monogram badge.
+  const FACE_POS = { pedro: "center 32%", vladimir: "center 32%", oscar: "center 20%", beltre: "center 28%", felix: "center 24%", horford: "center 18%" };
   const PHOTOS = new Set(["alfa", "beltre", "felix", "horford", "juanluis", "julia", "junot", "marichal", "marileidy", "milly", "ortiz", "oscar", "pedro", "pujols", "romeo", "sosa", "soto", "tatis", "ventura", "vladimir", "zoe"]);
   function avatar(p) {
     const c = CATS[p.cat].color;
@@ -178,6 +179,13 @@
     });
   }
 
+  function photoBlock(p) {
+    const c = CATS[p.cat].color;
+    const bg = `linear-gradient(135deg, ${c}, color-mix(in srgb, ${c} 50%, #0b1d44))`;
+    const pos = FACE_POS[p.id] || "center 22%";
+    if (PHOTOS.has(p.id)) return `<div class="legend-photo" style="background:${bg}"><img src="images/people/${p.id}.jpg" alt="${p.name}" style="object-position:${pos}" loading="lazy" onerror="this.remove()"></div>`;
+    return `<div class="legend-photo" style="background:${bg}"><span class="mono" aria-hidden="true">${p.init}</span></div>`;
+  }
   function renderGrid() {
     const q = query.trim().toLowerCase();
     const list = PEOPLE.filter((p) => (cat === "all" || p.cat === cat) && (!q || (p.name + " " + tr(p.role) + " " + tr(p.from)).toLowerCase().includes(q)));
@@ -186,11 +194,13 @@
     list.forEach((p) => {
       const card = document.createElement("article");
       card.className = "card legend-card";
-      card.innerHTML = `<div class="legend-head">${avatar(p)}<div><span class="tag" style="background:${CATS[p.cat].color}">${CATS[p.cat].emoji} ${tr(CATS[p.cat])}</span><h3>${p.name}</h3></div></div>
-        <p class="legend-role">${tr(p.role)} · <span class="muted">${tr(p.from)}</span></p>
+      card.innerHTML = `<div class="legend-top">${photoBlock(p)}<span class="tag" style="background:${CATS[p.cat].color}">${CATS[p.cat].emoji} ${tr(CATS[p.cat])}</span>${p.year ? `<span class="year-badge">${p.year}</span>` : ""}</div>
+        <div class="legend-body"><h3>${p.name}</h3>
+        <p class="legend-role">${tr(p.role)}</p><p class="legend-from">${tr(p.from)}</p>
         <div class="stat-chips">${statChips(p)}</div>
-        <button class="btn small alt" type="button">${L("Read story", "Leer historia")}</button>`;
+        <button class="btn small alt" type="button">${L("Read story", "Leer historia")}</button></div>`;
       $("button", card).addEventListener("click", () => openModal(p));
+      card.querySelector(".legend-top").addEventListener("click", () => openModal(p));
       grid.appendChild(card);
     });
   }
