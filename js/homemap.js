@@ -1,8 +1,9 @@
 /* ===== Home page: interactive island explorer ===== */
 (function () {
   "use strict";
-  const svg = document.getElementById("home-map");
+  const svg = document.getElementById("home-map") || document.getElementById("places-map");
   if (!svg) return;
+  const EXPLORE = svg.id === "places-map";   // on the Explore page, pins open the place modal instead of the side card
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
   const L = (en, es) => tr({ en, es });
@@ -116,14 +117,17 @@
       s.text = p.long; s.img = p.img; s.lon = p.lon; s.lat = p.lat;
     }
   });
+  if (EXPLORE) SPOTS.splice(0, SPOTS.length, ...SPOTS.filter((s) => s.from));
   const byId = (id) => SPOTS.find((s) => s.id === id);
-  const SD = byId("colonial");
+  const SD = SPOTS.find((s) => s.id === "colonial");
   const ROUTE = ["colonial", "altos", "saona", "puntacana", "haitises", "limon", "rincon", "cabarete", "damajagua", "santiago", "jarabacoa", "pico"];
   const pos = (s) => MAP.project(s.lon, s.lat);
 
-  let filter = "all", month = new Date().getMonth() + 1, current = null;
-  let tripToken = 0, tripping = false, tripIdx = -1;
+  let filter = "all", month = new Date().getMonth() + 1, current = null, hovered = null;
+  let tripToken = 0, tripping = false;
   const reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+  const ease = (k) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
 
   /* ---------- Draw the map ---------- */
   function el(name, attrs, parent) {
@@ -132,14 +136,16 @@
     if (parent) parent.appendChild(n);
     return n;
   }
+  const BASE = { x: -20, y: -50, w: 940, h: 780 };
   const outline = MAP.outline.map(([lo, la]) => { const p = MAP.project(lo, la); return `${p.x.toFixed(1)},${p.y.toFixed(1)}`; }).join(" ");
-  svg.setAttribute("viewBox", "-20 -50 940 780");
+  svg.setAttribute("viewBox", `${BASE.x} ${BASE.y} ${BASE.w} ${BASE.h}`);
   svg.innerHTML = `
     <defs>
-      <clipPath id="sea-clip"><rect x="-20" y="-50" width="940" height="780" rx="14"></rect></clipPath>
+      <clipPath id="sea-clip"><rect x="${BASE.x}" y="${BASE.y}" width="${BASE.w}" height="${BASE.h}" rx="14"></rect></clipPath>
       <filter id="land-shadow" x="-10%" y="-10%" width="120%" height="120%"><feDropShadow dx="0" dy="6" stdDeviation="8" flood-opacity="0.25"></feDropShadow></filter>
+      <linearGradient id="land-fill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--land-a)"></stop><stop offset="1" stop-color="var(--land-b)"></stop></linearGradient>
     </defs>
-    <rect class="sea" x="-20" y="-50" width="940" height="780" rx="14"></rect>
+    <rect class="sea" x="${BASE.x}" y="${BASE.y}" width="${BASE.w}" height="${BASE.h}" rx="14"></rect>
     <g clip-path="url(#sea-clip)"><g class="waves" id="waves"></g></g>
     <text class="sea-label" x="450" y="-14" text-anchor="middle">ATLANTIC OCEAN</text>
     <text class="sea-label" x="470" y="700" text-anchor="middle">CARIBBEAN SEA</text>
@@ -148,17 +154,11 @@
     <g id="terrain"></g>
     <polyline id="route" class="route" points=""></polyline>
     <g id="spots"></g>
-    <g id="traveler" class="traveler" visibility="hidden"><circle r="20"></circle><text text-anchor="middle" dy="7">🚗</text></g>
-    <g class="compass" transform="translate(820 600)"><circle r="34"></circle><path d="M0 -26 L7 0 L0 26 L-7 0 Z"></path><text y="-38" text-anchor="middle">N</text></g>`;
+    <g id="tip" class="tip" visibility="hidden"><g class="tip-s"><rect rx="10"></rect><text text-anchor="middle"></text></g></g>
+    <g id="traveler" class="traveler" visibility="hidden"><g class="pin-s"><circle r="20"></circle><text class="car" text-anchor="middle" dy="7">🚗</text></g></g>`;
 
-  // Animated waves
   const waves = $("#waves", svg);
-  for (let r = -3; r < 24; r++) {
-    for (let c = -1; c < 24; c++) {
-      el("path", { d: "M0 0 q9 -6 18 0 t18 0", class: "wave", transform: `translate(${c * 54 + (r % 2) * 27} ${r * 34})` }, waves);
-    }
-  }
-  // Terrain: Cordillera Central ridge and Lake Enriquillo
+  for (let r = -3; r < 24; r++) for (let c = -1; c < 24; c++) el("path", { d: "M0 0 q9 -6 18 0 t18 0", class: "wave", transform: `translate(${c * 54 + (r % 2) * 27} ${r * 34})` }, waves);
   const terrain = $("#terrain", svg);
   [[-71.3, 19.15], [-71.15, 19.05], [-70.85, 18.95], [-70.95, 18.85], [-70.7, 18.8], [-70.5, 18.85], [-70.35, 19.0], [-71.05, 18.75], [-70.55, 19.0]].forEach(([lo, la]) => {
     const p = MAP.project(lo, la); el("text", { x: p.x, y: p.y, class: "peak", "text-anchor": "middle" }, terrain).textContent = "▲";
@@ -166,25 +166,138 @@
   const lk = MAP.project(-71.58, 18.5);
   el("ellipse", { cx: lk.x, cy: lk.y + 8, rx: 44, ry: 10, class: "lake" }, terrain);
 
-  /* ---------- Pins ---------- */
-  const layer = $("#spots", svg);
-  SPOTS.forEach((s) => {
+  /* ---------- Pins (teardrop markers, constant size on screen) ---------- */
+  const layer = $("#spots", svg), tip = $("#tip", svg), route = $("#route", svg), traveler = $("#traveler", svg);
+  const PIN_PATH = "M0 0 C-9 -12 -19 -20 -19 -33 a19 19 0 1 1 38 0 C19 -20 9 -12 0 0Z";
+  SPOTS.slice().sort((a, b) => b.lat - a.lat).forEach((s, i) => {
     const { x, y } = pos(s), c = CATS[s.cat];
     const g = el("g", { class: "spot", tabindex: 0, role: "button", "data-id": s.id, transform: `translate(${x.toFixed(1)} ${y.toFixed(1)})` }, layer);
-    el("circle", { class: "halo", r: 20 }, g);
-    el("circle", { class: "dot", r: 16, fill: c.color }, g);
-    el("text", { class: "emo", "text-anchor": "middle", dy: 6 }, g).textContent = s.emoji;
-    el("text", { class: "lab", "text-anchor": "middle", y: -26 }, g);
-    g.addEventListener("click", () => { stopTrip(); select(s.id); });
-    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stopTrip(); select(s.id); } });
-    g.addEventListener("mouseenter", () => layer.appendChild(g));
-    g.addEventListener("focus", () => layer.appendChild(g));
+    const sc = el("g", { class: "pin-s" }, g);
+    el("circle", { class: "hit", r: 30, cy: -22 }, sc);
+    el("ellipse", { class: "halo", rx: 20, ry: 8 }, sc);
+    el("ellipse", { class: "shadow", rx: 9, ry: 3.5, cy: 1 }, sc);
+    const a = el("g", { class: "pin-a", style: `animation-delay:${(i * 45)}ms` }, sc);
+    el("path", { class: "body", d: PIN_PATH, fill: c.color }, a);
+    el("circle", { class: "bubble", cy: -33, r: 14 }, a);
+    el("text", { class: "emo", "text-anchor": "middle", y: -27 }, a).textContent = s.emoji;
+    g.addEventListener("click", () => { stopTrip(); select(s.id, true); });
+    g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stopTrip(); select(s.id, true); } });
+    g.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") { hovered = s; showTip(s); } });
+    g.addEventListener("pointerleave", () => { if (hovered === s) { hovered = null; showTip(current); } });
+    g.addEventListener("focus", () => showTip(s));
+    g.addEventListener("blur", () => showTip(current));
     s.node = g;
   });
 
-  /* ---------- Controls ---------- */
+  /* ---------- Camera: zoom, pan and fly-to by driving the viewBox ---------- */
+  let cam = { cx: BASE.x + BASE.w / 2, cy: BASE.y + BASE.h / 2, k: 1 }, flyToken = 0;
+  function setCam(cx, cy, k) {
+    k = clamp(k, 1, 7);
+    const vw = BASE.w / k, vh = BASE.h / k;
+    cx = clamp(cx, BASE.x + vw / 2, BASE.x + BASE.w - vw / 2); cy = clamp(cy, BASE.y + vh / 2, BASE.y + BASE.h - vh / 2);
+    cam = { cx, cy, k };
+    svg.setAttribute("viewBox", `${(cx - vw / 2).toFixed(2)} ${(cy - vh / 2).toFixed(2)} ${vw.toFixed(2)} ${vh.toFixed(2)}`);
+    updatePinScale();
+  }
+  function updatePinScale() {
+    const rw = svg.getBoundingClientRect().width || 600, pxPerUnit = rw / (BASE.w / cam.k);
+    const target = rw < 480 ? 34 : 40;            // pin height in screen pixels
+    svg.style.setProperty("--pin", (target / 52 / pxPerUnit).toFixed(4));
+    svg.classList.toggle("zoomed", cam.k > 1.02);
+    svg.style.touchAction = cam.k > 1.02 ? "none" : "pan-y";
+    $("#z-in").disabled = cam.k >= 7; $("#z-out").disabled = cam.k <= 1.02; $("#z-reset").hidden = cam.k <= 1.02;
+  }
+  function flyTo(cx, cy, k, dur) {
+    const my = ++flyToken, from = { ...cam };
+    if (reduced || !dur) { setCam(cx, cy, k); return; }
+    const t0 = performance.now();
+    const tick = (t) => {
+      if (my !== flyToken) return;
+      const p = ease(Math.min(1, (t - t0) / dur));
+      // zoom in log space so it feels even
+      const kk = Math.exp(Math.log(from.k) + (Math.log(k) - Math.log(from.k)) * p);
+      setCam(from.cx + (cx - from.cx) * p, from.cy + (cy - from.cy) * p, kk);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+  const resetView = () => flyTo(BASE.x + BASE.w / 2, BASE.y + BASE.h / 2, 1, 700);
+  function zoomAt(px, py, factor) {
+    flyToken++;
+    const r = svg.getBoundingClientRect(), vw = BASE.w / cam.k, vh = BASE.h / cam.k;
+    const sx = cam.cx + (px / r.width - 0.5) * vw, sy = cam.cy + (py / r.height - 0.5) * vh;
+    const k = clamp(cam.k * factor, 1, 7), nvw = BASE.w / k, nvh = BASE.h / k;
+    setCam(sx - (px / r.width - 0.5) * nvw, sy - (py / r.height - 0.5) * nvh, k);
+  }
+  const zoomCenter = (f) => { const r = svg.getBoundingClientRect(); zoomAt(r.width / 2, r.height / 2, f); };
+  $("#z-in").addEventListener("click", () => { stopTrip(); zoomCenter(1.6); });
+  $("#z-out").addEventListener("click", () => { stopTrip(); zoomCenter(1 / 1.6); });
+  $("#z-reset").addEventListener("click", () => { stopTrip(); resetView(); });
+  window.addEventListener("resize", updatePinScale);
+
+  // Wheel zoom only with Ctrl/Cmd (or a trackpad pinch), so normal scrolling still moves the page
+  svg.addEventListener("wheel", (e) => {
+    if (!(e.ctrlKey || e.metaKey)) return;
+    e.preventDefault(); stopTrip();
+    const r = svg.getBoundingClientRect();
+    zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * 0.01));
+  }, { passive: false });
+  svg.addEventListener("dblclick", (e) => {
+    if (e.target.closest(".spot")) return;
+    stopTrip(); const r = svg.getBoundingClientRect(); zoomAt(e.clientX - r.left, e.clientY - r.top, 2);
+  });
+
+  // Drag to pan, pinch to zoom
+  const pointers = new Map(); let panStart = null, moved = false, suppressClick = false, pinchD = 0;
+  svg.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    moved = false; suppressClick = false;
+    if (pointers.size === 1) panStart = { x: e.clientX, y: e.clientY, cx: cam.cx, cy: cam.cy };
+    if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinchD = Math.hypot(a.x - b.x, a.y - b.y); }
+  });
+  svg.addEventListener("pointermove", (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const r = svg.getBoundingClientRect();
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()], d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinchD) { stopTrip(); zoomAt((a.x + b.x) / 2 - r.left, (a.y + b.y) / 2 - r.top, d / pinchD); moved = true; }
+      pinchD = d; return;
+    }
+    if (!panStart || cam.k <= 1.02) return;
+    const dx = e.clientX - panStart.x, dy = e.clientY - panStart.y;
+    if (!moved && Math.hypot(dx, dy) < 6) return;
+    if (!moved) { moved = true; stopTrip(); flyToken++; try { svg.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ } svg.classList.add("panning"); hideTip(); }
+    const vw = BASE.w / cam.k, vh = BASE.h / cam.k;
+    setCam(panStart.cx - (dx / r.width) * vw, panStart.cy - (dy / r.height) * vh, cam.k);
+  });
+  const endPointer = (e) => {
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinchD = 0;
+    if (moved) suppressClick = true;
+    if (!pointers.size) { panStart = null; svg.classList.remove("panning"); setTimeout(() => { suppressClick = false; }, 0); }
+  };
+  svg.addEventListener("pointerup", endPointer); svg.addEventListener("pointercancel", endPointer);
+  svg.addEventListener("click", (e) => { if (suppressClick) { e.stopPropagation(); e.preventDefault(); } }, true);
+
+  /* ---------- Tooltip label (its own layer, so pins never move in the DOM) ---------- */
+  function hideTip() { tip.setAttribute("visibility", "hidden"); }
+  function showTip(s) {
+    if (!s) { hideTip(); return; }
+    const { x, y } = pos(s), t = $("text", tip), r = $("rect", tip);
+    t.textContent = tr(s.name).split(":")[0].split(",")[0];
+    tip.setAttribute("transform", `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+    tip.setAttribute("visibility", "visible");
+    const bb = t.getBBox();
+    t.setAttribute("y", -62);
+    r.setAttribute("x", bb.x - 10); r.setAttribute("width", bb.width + 20); r.setAttribute("height", bb.height + 10); r.setAttribute("y", -62 - bb.height * 0.78 - 4);
+  }
+
+  /* ---------- Filters and month ---------- */
   const chipBox = $("#map-chips");
   function renderChips() {
+    if (!chipBox) return;
     chipBox.innerHTML = "";
     const mk = (key, label) => {
       const b = document.createElement("button");
@@ -196,49 +309,51 @@
     mk("all", L("All", "Todo"));
     Object.keys(CATS).forEach((k) => mk(k, CATS[k].emoji + " " + tr(CATS[k])));
   }
-
   function liveNow(s) { return !!(s.months && s.months.includes(month)); }
   function applyView() {
     SPOTS.forEach((s) => {
       const on = filter === "all" || s.cat === filter;
-      s.node.classList.toggle("dim", !on);
+      if (!EXPLORE) s.node.classList.toggle("dim", !on);
       s.node.classList.toggle("live", on && liveNow(s));
       s.node.classList.toggle("active", !!current && current.id === s.id);
       s.node.setAttribute("aria-label", tr(s.name) + (liveNow(s) ? " (" + L("happening now", "ocurre ahora") + ")" : ""));
-      $(".lab", s.node).textContent = tr(s.name).split(":")[0].split(",")[0];
     });
+    showTip(hovered || current);
   }
-
   const monthRange = $("#month-range");
   function renderMonth() {
+    if (!monthRange) return;
     $("#month-name").textContent = MONTHS[window.LANG][month - 1];
     const box = $("#month-events");
     box.innerHTML = "";
     const evs = SPOTS.filter((s) => s.ev && liveNow(s));
-    if (!evs.length) {
-      box.innerHTML = `<span class="muted">${L("No big events this month. A good time to wander off the map.", "Sin grandes eventos este mes. Buen momento para pasear sin prisa.")}</span>`;
-    }
+    if (!evs.length) box.innerHTML = `<span class="muted">${L("No big events this month. A good time to wander off the map.", "Sin grandes eventos este mes. Buen momento para pasear sin prisa.")}</span>`;
     evs.forEach((s) => {
       const b = document.createElement("button");
       b.type = "button"; b.className = "event-pill"; b.textContent = s.emoji + " " + tr(s.ev);
-      b.addEventListener("click", () => { stopTrip(); select(s.id); });
+      b.addEventListener("click", () => { stopTrip(); select(s.id, true); });
       box.appendChild(b);
     });
   }
-  monthRange.value = month;
-  monthRange.addEventListener("input", () => { month = Number(monthRange.value); renderMonth(); applyView(); if (current) renderPanel(); });
+  if (monthRange) monthRange.value = month;
+  monthRange?.addEventListener("input", () => { month = Number(monthRange.value); renderMonth(); applyView(); if (current) renderPanel(false); });
 
   /* ---------- Info panel ---------- */
-  function visible() { return SPOTS.filter((s) => filter === "all" || s.cat === filter); }
-  function renderPanel() {
+  const visible = () => SPOTS.filter((s) => filter === "all" || s.cat === filter);
+  function renderPanel(animate) {
     const s = current;
-    const panel = $("#spot-panel");
-    if (!s) return;
-    panel.classList.add("has-spot");
-    const c = CATS[s.cat];
-    const photo = $("#sp-photo");
-    if (s.img) { photo.style.background = ""; photo.innerHTML = `<img src="images/${s.img}.jpg" alt="${tr(s.name)}">`; }
-    else { photo.innerHTML = `<span class="big-emoji" aria-hidden="true">${s.emoji}</span>`; photo.style.background = `linear-gradient(135deg, ${c.color}, color-mix(in srgb, ${c.color} 55%, #0b1d44))`; }
+    if (!s || EXPLORE) return;
+    const c = CATS[s.cat], photo = $("#sp-photo");
+    const body = $(".spot-body");
+    if (animate) { body.classList.remove("swap"); photo.classList.remove("swap"); void body.offsetWidth; body.classList.add("swap"); photo.classList.add("swap"); }
+    if (s.img) {
+      photo.style.background = "";
+      const img = new Image(); img.alt = tr(s.name); img.src = `images/${s.img}.jpg`;
+      photo.innerHTML = ""; photo.appendChild(img);
+    } else {
+      photo.innerHTML = `<span class="big-emoji" aria-hidden="true">${s.emoji}</span>`;
+      photo.style.background = `linear-gradient(135deg, ${c.color}, color-mix(in srgb, ${c.color} 55%, #0b1d44))`;
+    }
     const tag = $("#sp-cat"); tag.textContent = c.emoji + " " + tr(c); tag.style.background = c.color;
     $("#sp-now").hidden = !liveNow(s);
     $("#sp-now").textContent = "● " + L("Happening in " + MONTHS.en[month - 1], "Ocurre en " + MONTHS.es[month - 1].toLowerCase());
@@ -249,30 +364,34 @@
     $("#sp-dist").textContent = s.id === "colonial" ? L("You are in the capital.", "Estás en la capital.")
       : L(`About ${km} km from Santo Domingo in a straight line.`, `A unos ${km} km de Santo Domingo en línea recta.`);
   }
-  function select(id) {
+  function select(id, fly) {
     current = byId(id);
-    $("#spot-panel").classList.add("has-spot");
+    if (EXPLORE) { applyView(); const pl = PLACES.find((p) => p.id === current.from); if (pl && window.openPlaceModal) window.openPlaceModal(pl); return; }
     $("#sp-welcome").hidden = true; $("#sp-detail").hidden = false;
-    renderPanel(); applyView();
-    layer.appendChild(current.node);
-    const p = $("#spot-panel");
-    p.classList.remove("pop"); void p.offsetWidth; p.classList.add("pop");
-    if (window.innerWidth < 900 && !tripping) p.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
+    renderPanel(true); applyView();
+    if (fly) { const p = pos(current); flyTo(p.x, p.y - 22, Math.max(cam.k, 2.3), 800); }
+    const panel = $("#spot-panel");
+    if (window.innerWidth < 900 && !tripping) {
+      const r = panel.getBoundingClientRect();
+      // bring the card into view but keep the lower half of the map visible above it
+      if (r.top > window.innerHeight * 0.7) window.scrollBy({ top: r.top - window.innerHeight * 0.5, behavior: reduced ? "auto" : "smooth" });
+    }
   }
   function step(dir) {
     const list = visible(); if (!list.length) return;
     let i = current ? list.indexOf(current) : -1;
     i = (i + dir + list.length) % list.length;
-    stopTrip(); select(list[i].id);
+    stopTrip(); select(list[i].id, true);
   }
-  $("#sp-prev").addEventListener("click", () => step(-1));
-  $("#sp-next").addEventListener("click", () => step(1));
-  $("#sp-random").addEventListener("click", () => { const l = visible(); stopTrip(); select(l[Math.floor(Math.random() * l.length)].id); });
-  $("#sp-random-2").addEventListener("click", () => $("#sp-random").click());
+  $("#sp-prev")?.addEventListener("click", () => step(-1));
+  $("#sp-next")?.addEventListener("click", () => step(1));
+  $("#sp-random")?.addEventListener("click", () => { const l = visible(); stopTrip(); select(l[Math.floor(Math.random() * l.length)].id, true); });
+  $("#sp-random-2")?.addEventListener("click", () => $("#sp-random").click());
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && cam.k > 1.02 && svg.contains(document.activeElement)) resetView(); });
 
-  /* ---------- Road trip ---------- */
-  const traveler = $("#traveler", svg), route = $("#route", svg), tripBtn = $("#trip-btn");
-  function setTripLabel() { tripBtn.textContent = tripping ? L("■ Stop trip", "■ Detener viaje") : L("🚗 Start road trip", "🚗 Iniciar viaje"); }
+  /* ---------- Road trip: the camera follows the car ---------- */
+  const tripBtn = $("#trip-btn"), TRIP_K = 2;
+  function setTripLabel() { if (tripBtn) tripBtn.textContent = tripping ? L("■ Stop trip", "■ Detener viaje") : L("🚗 Start road trip", "🚗 Iniciar viaje"); }
   function stopTrip() {
     if (!tripping) return;
     tripping = false; tripToken++; traveler.setAttribute("visibility", "hidden");
@@ -280,41 +399,59 @@
   }
   function startTrip() {
     stopTrip();
-    tripping = true; tripIdx = -1; const my = ++tripToken;
-    filter = "all"; renderChips();
+    tripping = true; const my = ++tripToken;
+    filter = "all"; renderChips(); applyView();
     route.setAttribute("points", ""); svg.classList.add("tripping"); setTripLabel();
     $("#map-stage").scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
     const first = pos(byId(ROUTE[0]));
     traveler.setAttribute("visibility", "visible");
     traveler.setAttribute("transform", `translate(${first.x} ${first.y})`);
-    arrive(0, my);
+    flyTo(first.x, first.y, TRIP_K, 900);
+    setTimeout(() => arrive(0, my), reduced ? 0 : 900);
+  }
+  function routePoints(upto, extra) {
+    const pts = ROUTE.slice(0, upto + 1).map((id) => pos(byId(id)));
+    if (extra) pts.push(extra);
+    return pts.map((q) => `${q.x.toFixed(1)},${q.y.toFixed(1)}`).join(" ");
   }
   function arrive(i, my) {
     if (my !== tripToken) return;
     const s = byId(ROUTE[i]), p = pos(s);
-    route.setAttribute("points", ROUTE.slice(0, i + 1).map((id) => { const q = pos(byId(id)); return `${q.x.toFixed(1)},${q.y.toFixed(1)}`; }).join(" "));
+    route.setAttribute("points", routePoints(i));
     traveler.setAttribute("transform", `translate(${p.x} ${p.y})`);
-    tripping = true; select(s.id); tripping = true;
+    select(s.id, false);
     setTimeout(() => {
       if (my !== tripToken) return;
-      if (i + 1 >= ROUTE.length) { stopTrip(); return; }
+      if (i + 1 >= ROUTE.length) { stopTrip(); resetView(); return; }
       drive(i, i + 1, my);
-    }, 4200);
+    }, 4000);
   }
   function drive(a, b, my) {
     const A = pos(byId(ROUTE[a])), B = pos(byId(ROUTE[b]));
-    const dur = reduced ? 1 : 1500, t0 = performance.now();
+    $(".car", traveler).setAttribute("transform", B.x < A.x ? "scale(-1 1)" : "");
+    const dur = reduced ? 1 : 1800, t0 = performance.now();
     const tick = (t) => {
       if (my !== tripToken) return;
-      const k = Math.min(1, (t - t0) / dur), e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-      traveler.setAttribute("transform", `translate(${A.x + (B.x - A.x) * e} ${A.y + (B.y - A.y) * e})`);
+      const k = Math.min(1, (t - t0) / dur), e = ease(k);
+      const x = A.x + (B.x - A.x) * e, y = A.y + (B.y - A.y) * e;
+      traveler.setAttribute("transform", `translate(${x} ${y})`);
+      route.setAttribute("points", routePoints(a, { x, y }));
+      setCam(x, y, TRIP_K);
       if (k < 1) requestAnimationFrame(tick); else arrive(b, my);
     };
     requestAnimationFrame(tick);
   }
-  tripBtn.addEventListener("click", () => (tripping ? stopTrip() : startTrip()));
+  tripBtn?.addEventListener("click", () => (tripping ? stopTrip() : startTrip()));
 
   /* ---------- Language ---------- */
-  document.addEventListener("langchange", () => { renderChips(); renderMonth(); applyView(); if (current) renderPanel(); setTripLabel(); });
-  renderChips(); renderMonth(); applyView(); setTripLabel();
+  // Explore page: the card filters and search also filter the pins, and closing the modal clears the selection
+  document.addEventListener("placesfilter", (e) => {
+    if (!EXPLORE) return;
+    SPOTS.forEach((s) => s.node.classList.toggle("dim", !e.detail.ids.includes(s.from)));
+    showTip(hovered || current);
+  });
+  document.addEventListener("placeclosed", () => { if (EXPLORE) { current = null; applyView(); } });
+  document.addEventListener("langchange", () => { renderChips(); renderMonth(); applyView(); if (current) renderPanel(false); setTripLabel(); });
+  renderChips(); renderMonth(); applyView(); setTripLabel(); setCam(cam.cx, cam.cy, 1);
+  new ResizeObserver(updatePinScale).observe(svg);
 })();

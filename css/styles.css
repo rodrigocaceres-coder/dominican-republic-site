@@ -330,8 +330,8 @@ section { padding: clamp(3rem, 7vw, 5.5rem) 0; }
 
 .map-layout { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); gap: 1.4rem; align-items: start; }
 .big-map { padding: 0.5rem; overflow: hidden; }
-#home-map { user-select: none; }
-#home-map .sea { fill: color-mix(in srgb, var(--blue) 16%, var(--surface)); }
+#home-map, #places-map { user-select: none; }
+#home-map .sea, #places-map .sea { fill: color-mix(in srgb, var(--blue) 16%, var(--surface)); }
 .wave { fill: none; stroke: color-mix(in srgb, var(--blue) 40%, transparent); stroke-width: 2; opacity: 0.5; }
 .waves { animation: drift 6s linear infinite; }
 @keyframes drift { to { transform: translate(-54px, 0); } }
@@ -342,21 +342,9 @@ section { padding: clamp(3rem, 7vw, 5.5rem) 0; }
 .compass path { fill: var(--red); }
 .compass text { font: 800 16px var(--font-body); fill: var(--ink); }
 .route { fill: none; stroke: var(--red); stroke-width: 4; stroke-dasharray: 3 11; stroke-linecap: round; stroke-linejoin: round; }
-.traveler circle { fill: #fff; stroke: var(--red); stroke-width: 4; }
-.traveler text { font-size: 22px; }
 
-.spot { cursor: pointer; outline: none; transition: opacity 0.25s; }
-.spot .dot { stroke: #fff; stroke-width: 3; transition: transform 0.18s; transform-box: fill-box; transform-origin: center; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35)); }
-.spot .emo { font-size: 17px; pointer-events: none; }
-.spot .halo { fill: none; stroke: var(--gold); stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
-.spot .lab { font: 800 17px var(--font-body); fill: var(--ink); paint-order: stroke; stroke: var(--surface); stroke-width: 5px; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
-.spot:hover .dot, .spot:focus-visible .dot, .spot.active .dot { transform: scale(1.25); }
-.spot:hover .lab, .spot:focus-visible .lab, .spot.active .lab { opacity: 1; }
-.spot.active .halo { opacity: 1; stroke: var(--red); }
-.spot.live .halo { opacity: 1; animation: ping 1.6s ease-out infinite; }
-@keyframes ping { from { transform: scale(0.8); opacity: 1; } to { transform: scale(1.9); opacity: 0; } }
-.spot.dim { opacity: 0.18; pointer-events: none; }
-.tripping .spot { pointer-events: none; }
+
+
 @media (prefers-reduced-motion: reduce) { .waves, .spot.live .halo, .event-pill { animation: none; } }
 
 .spot-panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; position: sticky; top: 90px; min-height: 360px; }
@@ -497,3 +485,55 @@ section { padding: clamp(3rem, 7vw, 5.5rem) 0; }
 #legends-filters { display: flex; }
 
 .btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; filter: none; }
+
+/* ---- Interactive map v2: smooth pins, zoom and pan ---- */
+:root { --land-a: #cfe5c9; --land-b: #a9d1a8; }
+:root[data-theme="dark"] { --land-a: #2f6b53; --land-b: #1f4f3f; }
+.big-map { position: relative; padding: 0.5rem; overflow: hidden; }
+#home-map, #places-map { display: block; width: 100%; height: auto; touch-action: pan-y; cursor: default; --pin: 1; border-radius: 12px; }
+#home-map.zoomed, #places-map.zoomed { cursor: grab; }
+#home-map.panning, #places-map.panning { cursor: grabbing; }
+#home-map .land, #places-map .land { fill: url(#land-fill); stroke: var(--green); stroke-width: 2.5; }
+.pin-s { transform: scale(var(--pin)); }
+.spot { cursor: pointer; outline: none; }
+.spot .hit { fill: transparent; }
+.spot .pin-a { transform-box: fill-box; transform-origin: 50% 100%; animation: drop 0.55s cubic-bezier(0.3, 1.5, 0.5, 1) both; transition: transform 0.18s ease, filter 0.18s; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35)); }
+@keyframes drop { from { transform: translateY(-40px) scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
+.spot .body { stroke: #fff; stroke-width: 2.5; stroke-linejoin: round; }
+.spot .bubble { fill: #fff; }
+.spot .emo { font-size: 18px; pointer-events: none; }
+.spot .shadow { fill: rgba(0, 0, 0, 0.3); }
+.spot .halo { fill: none; stroke: var(--gold); stroke-width: 3; opacity: 0; transform-box: fill-box; transform-origin: center; }
+.spot:hover .pin-a, .spot:focus-visible .pin-a { transform: translateY(-4px) scale(1.14); }
+.spot.active .pin-a { animation: hop 0.5s ease; transform: translateY(-4px) scale(1.18); filter: drop-shadow(0 4px 6px rgba(206, 17, 38, 0.55)); }
+@keyframes hop { 40% { transform: translateY(-16px) scale(1.18); } }
+.spot.active .halo { opacity: 1; stroke: var(--red); }
+.spot.live .halo { opacity: 1; animation: ping 1.7s ease-out infinite; }
+@keyframes ping { from { transform: scale(0.7); opacity: 1; } to { transform: scale(2.2); opacity: 0; } }
+.spot:focus-visible .body { stroke: var(--gold); stroke-width: 4; }
+.spot { transition: opacity 0.3s; }
+.spot.dim { opacity: 0.15; pointer-events: none; }
+.tripping .spot { pointer-events: none; }
+.tip { pointer-events: none; }
+.tip rect { fill: var(--ink); opacity: 0.94; }
+.tip text { fill: var(--bg); font: 800 16px var(--font-body); }
+.tip .tip-s { transform: scale(var(--pin)); }
+.traveler { pointer-events: none; }
+.traveler circle { fill: #fff; stroke: var(--red); stroke-width: 4; }
+.traveler .pin-s { transform: scale(var(--pin)); }
+.traveler text { font-size: 22px; }
+.zoom-ctl { position: absolute; top: 1rem; right: 1rem; display: grid; gap: 0.4rem; z-index: 2; }
+.zoom-ctl button { width: 42px; height: 42px; border-radius: 12px; border: 2px solid var(--line); background: color-mix(in srgb, var(--surface) 94%, transparent); color: var(--ink); font: 800 1.3rem var(--font-body); cursor: pointer; box-shadow: var(--shadow); backdrop-filter: blur(6px); transition: transform 0.15s, border-color 0.2s; }
+.zoom-ctl button:hover:not(:disabled) { border-color: var(--blue); transform: translateY(-1px); }
+.zoom-ctl button:disabled { opacity: 0.4; cursor: not-allowed; }
+.map-hint { position: absolute; left: 1rem; bottom: 0.9rem; margin: 0; font-size: 0.78rem; font-weight: 700; color: var(--muted); background: color-mix(in srgb, var(--surface) 88%, transparent); padding: 0.2rem 0.7rem; border-radius: 99px; pointer-events: none; }
+.spot-body.swap { animation: slidein 0.4s ease both; }
+.spot-photo.swap img { animation: fadein 0.5s ease both; }
+@keyframes slidein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes fadein { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .spot .pin-a, .spot.active .pin-a, .spot.live .halo, .spot-body.swap, .spot-photo.swap img { animation: none; } }
+.compass-badge { position: absolute; right: 1rem; bottom: 0.9rem; width: 46px; height: 46px; border-radius: 50%; background: color-mix(in srgb, var(--surface) 92%, transparent); border: 2px solid var(--line); display: grid; place-items: center; pointer-events: none; box-shadow: var(--shadow); }
+.compass-badge b { font: 800 0.7rem var(--font-body); color: var(--ink); position: absolute; top: 2px; }
+.compass-badge::after { content: ""; width: 8px; height: 22px; margin-top: 8px; background: linear-gradient(var(--red) 50%, var(--muted) 50%); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+
+.explore-map { max-width: 860px; margin-inline: auto; }

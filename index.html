@@ -63,7 +63,14 @@
       </div>
 
       <div class="map-layout">
-        <div class="map-wrap big-map">
+        <div class="map-wrap big-map" id="map-box">
+          <div class="zoom-ctl">
+            <button id="z-in" type="button" aria-label="Zoom in">+</button>
+            <button id="z-out" type="button" aria-label="Zoom out" disabled>−</button>
+            <button id="z-reset" type="button" aria-label="Reset view" title="Reset view" hidden>⟲</button>
+          </div>
+          <div class="compass-badge" aria-hidden="true"><b>N</b></div>
+          <p class="map-hint" data-es="Toca un pin · arrastra para mover · Ctrl + rueda para acercar">Tap a pin · drag to move · Ctrl + scroll to zoom</p>
           <svg id="home-map" viewBox="0 0 900 680" role="group" aria-label="Interactive map of the Dominican Republic" data-es-aria="Mapa interactivo de la República Dominicana"></svg>
         </div>
         <aside class="spot-panel" id="spot-panel" aria-live="polite">

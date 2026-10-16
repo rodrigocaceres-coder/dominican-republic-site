@@ -133,8 +133,10 @@
       grid.innerHTML = "";
       if (!list.length) {
         grid.innerHTML = `<p class="empty">${tr({ en: "No places match your search.", es: "Ningún lugar coincide con tu búsqueda." })}</p>`;
+        document.dispatchEvent(new CustomEvent("placesfilter", { detail: { ids: [] } }));
         return;
       }
+      document.dispatchEvent(new CustomEvent("placesfilter", { detail: { ids: list.map((p) => p.id) } }));
       list.forEach((p) => {
         const card = document.createElement("article");
         card.className = "card";
@@ -169,7 +171,8 @@
       $("#modal-close").focus();
       back.dataset.current = p.id;
     }
-    function closeModal() { $("#modal")?.classList.remove("open"); }
+    function closeModal() { $("#modal")?.classList.remove("open"); document.dispatchEvent(new CustomEvent("placeclosed")); }
+    window.openPlaceModal = openModal;
     $("#modal-close")?.addEventListener("click", closeModal);
     $("#modal")?.addEventListener("click", (e) => { if (e.target.id === "modal") closeModal(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeModal(); });
@@ -181,28 +184,8 @@
     }));
     $("#place-search")?.addEventListener("input", (e) => { query = e.target.value; renderGrid(); });
 
-    // Island map with clickable pins
-    if (mapSvg) {
-      const pts = MAP.outline.map(([lo, la]) => { const p = MAP.project(lo, la); return `${p.x.toFixed(1)},${p.y.toFixed(1)}`; }).join(" ");
-      let pins = "";
-      PLACES.forEach((p) => {
-        const { x, y } = MAP.project(p.lon, p.lat);
-        pins += `<g class="pin" tabindex="0" role="button" data-id="${p.id}" aria-label="${tr(p.name)}">
-          <circle cx="${x}" cy="${y}" r="10"></circle>
-          <text x="${x > 680 ? x - 16 : x + 16}" y="${y + 5}" text-anchor="${x > 680 ? "end" : "start"}">${tr(p.name).split(",")[0]}</text></g>`;
-      });
-      mapSvg.innerHTML = `<rect class="sea" width="${MAP.w}" height="${MAP.h}" rx="12"></rect>
-        <polygon class="land" points="${pts}"></polygon>${pins}`;
-      const open = (g) => { const p = PLACES.find((x) => x.id === g.dataset.id); if (p) openModal(p); };
-      $$(".pin", mapSvg).forEach((g) => {
-        g.addEventListener("click", () => open(g));
-        g.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(g); } });
-      });
-    }
-
     document.addEventListener("langchange", () => {
       renderGrid();
-      if (mapSvg) { $$(".pin", mapSvg).forEach((g) => { const p = PLACES.find((x) => x.id === g.dataset.id); g.setAttribute("aria-label", tr(p.name)); $("text", g).textContent = tr(p.name).split(",")[0]; }); }
       const back = $("#modal");
       if (back?.classList.contains("open")) openModal(PLACES.find((x) => x.id === back.dataset.current));
     });

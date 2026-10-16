@@ -58,11 +58,17 @@
       <div class="section-head reveal">
         <p class="eyebrow" data-es="Mapa">Map</p>
         <h2 data-es="Dónde está todo">Where everything is</h2>
-        <p class="lead" data-es="Un mapa simplificado de la isla. Toca un punto rojo para ver los detalles.">A simplified map of the country. Tap a red pin to see details.</p>
+        <p class="lead" data-es="Un mapa del país. Toca un pin para ver los detalles, o acerca y arrastra para explorar.">A map of the country. Tap a pin to see details, or zoom and drag to explore.</p>
       </div>
-      <div class="map-wrap reveal">
-        <svg id="places-map" viewBox="0 0 900 680" role="img" aria-label="Map of the Dominican Republic with places to visit"></svg>
-        <p class="map-note" data-es="Mapa simplificado, no está a escala exacta.">Simplified map, not to exact scale.</p>
+      <div class="map-wrap big-map explore-map reveal" id="map-box">
+        <div class="zoom-ctl">
+          <button id="z-in" type="button" aria-label="Zoom in">+</button>
+          <button id="z-out" type="button" aria-label="Zoom out" disabled>−</button>
+          <button id="z-reset" type="button" aria-label="Reset view" title="Reset view" hidden>⟲</button>
+        </div>
+        <div class="compass-badge" aria-hidden="true"><b>N</b></div>
+        <p class="map-hint" data-es="Toca un pin · arrastra para mover · Ctrl + rueda para acercar">Tap a pin · drag to move · Ctrl + scroll to zoom</p>
+        <svg id="places-map" viewBox="0 0 900 680" role="group" aria-label="Interactive map of the Dominican Republic with places to visit"></svg>
       </div>
     </div>
   </section>
@@ -109,6 +115,7 @@
 </footer>
 <script src="js/data.js"></script>
 <script src="js/main.js"></script>
+<script src="js/homemap.js"></script>
 
 </body>
 </html>
