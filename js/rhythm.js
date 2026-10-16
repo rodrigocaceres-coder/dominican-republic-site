@@ -193,6 +193,7 @@
       }, 100);
     }
     running = true;
+    $("#r-stop").hidden = false;
     $("#r-start").textContent = window.LANG === "es" ? "Reiniciar" : "Restart";
     loop();
   }
@@ -239,12 +240,14 @@
   }
   function updateHud() { $("#r-score").textContent = score; $("#r-combo").textContent = combo; }
 
-  function finish() {
+  function finish(early) {
     stop(); finished = true;
-    const hits = notes.filter((n) => n.hit).length, acc = notes.length ? hits / notes.length : 0;
+    const played = early ? notes.filter((n) => n.hit || n.missed || noteTime(n) < clock()) : notes;
+    const hits = notes.filter((n) => n.hit).length, total = Math.max(1, played.length), acc = hits / total;
     const stars = acc >= 0.9 ? 3 : acc >= 0.7 ? 2 : acc >= 0.4 ? 1 : 0;
     if (score > best) { best = score; store.set("dr-best-rhythm-" + level, best); $("#r-best").textContent = best; }
-    resultMsg = { hits, total: notes.length, stars };
+    resultMsg = { hits, total: early ? played.length : notes.length, stars, early: !!early };
+    $("#r-stop").hidden = true;
     draw();
     $("#r-start").textContent = window.LANG === "es" ? "Jugar otra vez" : "Play again";
   }
@@ -255,7 +258,7 @@
     notes.forEach((n) => { if (!n.hit && !n.missed && now - noteTime(n) > cfg.win[2]) { n.missed = true; combo = 0; updateHud(); } });
     draw();
     const last = notes[notes.length - 1];
-    if (last && now - noteTime(last) > 1.2) { finish(); return; }
+    if (last && now - noteTime(last) > 1.2) { finish(false); return; }
     raf = requestAnimationFrame(loop);
   }
 
@@ -305,7 +308,7 @@
     if (finished && resultMsg) {
       c.fillStyle = "rgba(11,29,68,0.88)"; c.fillRect(0, 180, W, 230);
       c.fillStyle = "#fff"; c.font = "800 30px Georgia, serif";
-      c.fillText(window.LANG === "es" ? "¡Terminó la canción!" : "Song finished!", W / 2, 240);
+      c.fillText(resultMsg.early ? (window.LANG === "es" ? "Juego terminado" : "Game ended") : (window.LANG === "es" ? "¡Terminó la canción!" : "Song finished!"), W / 2, 240);
       c.fillStyle = "#e8a317"; c.font = "40px system-ui, sans-serif"; c.fillText("★".repeat(resultMsg.stars) + "☆".repeat(3 - resultMsg.stars), W / 2, 295);
       c.fillStyle = "#fff"; c.font = "700 20px system-ui, sans-serif";
       c.fillText(`${resultMsg.hits}/${resultMsg.total} ${window.LANG === "es" ? "notas" : "notes"} · ${score} ${window.LANG === "es" ? "puntos" : "points"}`, W / 2, 345);
@@ -322,18 +325,20 @@
     const r = canvas.getBoundingClientRect(), x = ((e.clientX - r.left) / r.width) * W;
     press(Math.max(0, Math.min(laneCount() - 1, Math.floor((x - laneX(0)) / laneW()))));
   });
-  document.addEventListener("visibilitychange", () => { if (document.hidden && running) { stop(); finished = false; draw(); $("#r-start").textContent = window.LANG === "es" ? "Empezar" : "Start"; } });
+  document.addEventListener("visibilitychange", () => { if (document.hidden && running) { stop(); finished = false; $("#r-stop").hidden = true; draw(); $("#r-start").textContent = window.LANG === "es" ? "Empezar" : "Start"; } });
   $("#r-start").addEventListener("click", start);
+  $("#r-stop").addEventListener("click", () => { if (running) finish(true); });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && running && $("#game-rhythm").classList.contains("active")) finish(true); });
   function setLevel(l) {
     level = l; cfg = LEVELS[l]; store.set("dr-rhythm-level", l);
     $$(".chip[data-level]").forEach((c) => c.setAttribute("aria-pressed", c.dataset.level === l));
-    stop(); finished = false; notes = []; flash = cfg.lanes.map(() => 0); score = 0; combo = 0; updateHud(); loadBest();
+    stop(); finished = false; notes = []; flash = cfg.lanes.map(() => 0); score = 0; combo = 0; updateHud(); loadBest(); $("#r-stop").hidden = true;
     $("#r-start").textContent = window.LANG === "es" ? "Empezar" : "Start";
     $("#r-keys").textContent = cfg.keys.map((k) => k.toUpperCase()).join("  ");
     draw();
   }
   $$(".chip[data-level]").forEach((c) => c.addEventListener("click", () => setLevel(c.dataset.level)));
   document.addEventListener("langchange", () => { if (!running) draw(); });
-  window.RhythmGame = { stop: () => { stop(); } };
+  window.RhythmGame = { stop: () => { stop(); $("#r-stop").hidden = true; } };
   setLevel(level);
 })();
